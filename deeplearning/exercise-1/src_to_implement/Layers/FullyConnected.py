@@ -5,7 +5,7 @@ class FullyConnected(object):
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size
-        self.weights = np.random.uniform(0, 1, (input_size, output_size))
+        self.weights = np.random.randn(input_size, output_size)
         self._optimizer = None
         self.input_tensor = None
         self._gradient_weights = None

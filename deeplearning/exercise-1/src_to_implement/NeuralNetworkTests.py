@@ -3,11 +3,10 @@ from Layers import Helpers, FullyConnected, ReLU, SoftMax
 from Optimization.Optimizers import Sgd
 from Optimization import Loss, Optimizers
 import numpy as np
-# import NeuralNetwork
-# import matplotlib.pyplot as plt
-#
-# ID = 1  # identifier for dispatcher
-#
+import NeuralNetwork
+import matplotlib.pyplot as plt
+
+ID = 1  # identifier for dispatcher
 
 
 class TestFullyConnected(unittest.TestCase):
@@ -270,77 +269,77 @@ class TestOptimizers(unittest.TestCase):
 
         result = optimizer.calculate_update(result, 1.)
         np.testing.assert_almost_equal(result, np.array([-1.]))
-#
-#
-# class TestNeuralNetwork(unittest.TestCase):
-#
-#     def test_append_trainable_layer(self):
-#         # this test checks if your network actually appends layers and whether it copies the optimizer to these layers
-#         net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1))
-#         fcl_1 = FullyConnected.FullyConnected(1, 1)
-#         net.append_trainable_layer(fcl_1)
-#         fcl_2 = FullyConnected.FullyConnected(1, 1)
-#         net.append_trainable_layer(fcl_2)
-#
-#         self.assertEqual(len(net.layers), 2)
-#         self.assertFalse(net.layers[0].optimizer is net.layers[1].optimizer)
-#
-#     def test_data_access(self):
-#         net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1))
-#         categories = 3
-#         input_size = 4
-#         net.data_layer = Helpers.IrisData(50)
-#         net.loss_layer = Loss.CrossEntropyLoss()
-#         fcl_1 = FullyConnected.FullyConnected(input_size, categories)
-#         net.append_trainable_layer(fcl_1)
-#         net.layers.append(ReLU.ReLU())
-#         fcl_2 = FullyConnected.FullyConnected(categories, categories)
-#         net.append_trainable_layer(fcl_2)
-#         net.layers.append(SoftMax.SoftMax())
-#
-#         out = net.forward()
-#         out2 = net.forward()
-#
-#         self.assertNotEqual(out, out2)
-#
-#     def test_iris_data(self):
-#         net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1e-3))
-#         categories = 3
-#         input_size = 4
-#         net.data_layer = Helpers.IrisData(50)
-#         net.loss_layer = Loss.CrossEntropyLoss()
-#
-#         fcl_1 = FullyConnected.FullyConnected(input_size, categories)
-#         net.append_trainable_layer(fcl_1)
-#         net.layers.append(ReLU.ReLU())
-#         fcl_2 = FullyConnected.FullyConnected(categories, categories)
-#         net.append_trainable_layer(fcl_2)
-#         net.layers.append(SoftMax.SoftMax())
-#
-#         net.train(4000)
-#         plt.figure('Loss function for a Neural Net on the Iris dataset using SGD')
-#         plt.plot(net.loss, '-x')
-#         plt.show()
-#
-#         data, labels = net.data_layer.get_test_set()
-#
-#         results = net.test(data)
-#         index_maximum = np.argmax(results, axis=1)
-#         one_hot_vector = np.zeros_like(results)
-#         for i in range(one_hot_vector.shape[0]):
-#             one_hot_vector[i, index_maximum[i]] = 1
-#
-#         correct = 0.
-#         wrong = 0.
-#         for column_results, column_labels in zip(one_hot_vector, labels):
-#             if column_results[column_labels > 0].all() > 0:
-#                 correct += 1
-#             else:
-#                 wrong += 1
-#
-#         accuracy = correct / (correct + wrong)
-#         print('\nOn the Iris dataset, we achieve an accuracy of: ' + str(accuracy * 100) + '%')
-#         self.assertGreater(accuracy, 0.8)
+
+
+class TestNeuralNetwork(unittest.TestCase):
+
+    def test_append_trainable_layer(self):
+        # this test checks if your network actually appends layers and whether it copies the optimizer to these layers
+        net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1))
+        fcl_1 = FullyConnected.FullyConnected(1, 1)
+        net.append_trainable_layer(fcl_1)
+        fcl_2 = FullyConnected.FullyConnected(1, 1)
+        net.append_trainable_layer(fcl_2)
+
+        self.assertEqual(len(net.layers), 2)
+        self.assertFalse(net.layers[0].optimizer is net.layers[1].optimizer)
+
+    def test_data_access(self):
+        net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1))
+        categories = 3
+        input_size = 4
+        net.data_layer = Helpers.IrisData(50)
+        net.loss_layer = Loss.CrossEntropyLoss()
+        fcl_1 = FullyConnected.FullyConnected(input_size, categories)
+        net.append_trainable_layer(fcl_1)
+        net.layers.append(ReLU.ReLU())
+        fcl_2 = FullyConnected.FullyConnected(categories, categories)
+        net.append_trainable_layer(fcl_2)
+        net.layers.append(SoftMax.SoftMax())
+
+        out = net.forward()
+        out2 = net.forward()
+
+        self.assertNotEqual(out, out2)
+
+    def test_iris_data(self):
+        net = NeuralNetwork.NeuralNetwork(Optimizers.Sgd(1e-3))
+        categories = 3
+        input_size = 4
+        net.data_layer = Helpers.IrisData(50)
+        net.loss_layer = Loss.CrossEntropyLoss()
+
+        fcl_1 = FullyConnected.FullyConnected(input_size, categories)
+        net.append_trainable_layer(fcl_1)
+        net.layers.append(ReLU.ReLU())
+        fcl_2 = FullyConnected.FullyConnected(categories, categories)
+        net.append_trainable_layer(fcl_2)
+        net.layers.append(SoftMax.SoftMax())
+
+        net.train(4000)
+        plt.figure('Loss function for a Neural Net on the Iris dataset using SGD')
+        plt.plot(net.loss, '-x')
+        plt.show()
+
+        data, labels = net.data_layer.get_test_set()
+
+        results = net.test(data)
+        index_maximum = np.argmax(results, axis=1)
+        one_hot_vector = np.zeros_like(results)
+        for i in range(one_hot_vector.shape[0]):
+            one_hot_vector[i, index_maximum[i]] = 1
+
+        correct = 0.
+        wrong = 0.
+        for column_results, column_labels in zip(one_hot_vector, labels):
+            if column_results[column_labels > 0].all() > 0:
+                correct += 1
+            else:
+                wrong += 1
+
+        accuracy = correct / (correct + wrong)
+        print('\nOn the Iris dataset, we achieve an accuracy of: ' + str(accuracy * 100) + '%')
+        self.assertGreater(accuracy, 0.8)
 
 
 class L2Loss:
