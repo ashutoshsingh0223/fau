@@ -9,7 +9,7 @@ class CrossEntropyLoss(object):
         self.input_tensor = input_tensor
         correct_label_indices = label_tensor == 1
         logit_values = input_tensor[correct_label_indices]
-        adjusted_logit_values = logit_values + 1e-15
+        adjusted_logit_values = logit_values + np.finfo(float).eps
         loss = sum(np.log(adjusted_logit_values) * -1)
         return loss
 

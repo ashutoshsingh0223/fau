@@ -9,17 +9,17 @@ class NeuralNetwork(object):
         self.data_layer = None
         self.loss_layer = None
         self.optimizer = optimizer
+        self.label_tensor = None
 
     def forward(self):
-        out, label_tensor = self.data_layer.next()
+        out, self.label_tensor = self.data_layer.next()
         for index in range(len(self.layers)):
             out = self.layers[index].forward(out)
-        out = self.loss_layer.forward(out, label_tensor)
+        out = self.loss_layer.forward(out, self.label_tensor)
         return out
 
     def backward(self):
-        _, label_tensor = self.data_layer.next()
-        En = self.loss_layer.backward(label_tensor)
+        En = self.loss_layer.backward(self.label_tensor)
         last_index = len(self.layers) - 1
         for index in range(len(self.layers)):
             En = self.layers[last_index - index].backward(En)
