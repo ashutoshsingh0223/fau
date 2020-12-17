@@ -164,8 +164,6 @@ class Conv(object):
         self._gradient_bias = gradient_bias
 
         if self._optimizer:
-            # print(self.bias.shape)
-            # print(self._gradient_bias)
             self.weights = self._optimizer.calculate_update(self.weights, self._gradient_weights)
             self.bias = self.bias_optimizer.calculate_update(self.bias, self._gradient_bias)
 

@@ -32,7 +32,7 @@ class Pooling(object):
         pool_out = np.zeros((*input_tensor.shape[:2], *poot_out_y_x))
         # print(pool_out[0, 0, 0, 2])
 
-        max_map = {}
+        max_map = []
         for batch_index, input_batch in enumerate(input_tensor):
             for channel_index, channel in enumerate(input_batch):
                 r2 = 0
@@ -45,35 +45,31 @@ class Pooling(object):
                             pool_out[batch_index, channel_index, r2, c2] = np.max(window)
                             # print(r2, c2)
                             max_index = np.unravel_index(window.argmax(), window.shape)
-                            max_map[f'{batch_index}_{channel_index}_{r2}_{c2}'] = (max_index[0] + r, max_index[1] + c)
+
+                            max_map.append(((batch_index, channel_index, max_index[0] + r, max_index[1] + c),
+                                           (batch_index, channel_index, r2, c2)))
                             c2 = c2 + 1
                     else:
                         window = input_batch[channel_index][r:r + self.pooling_shape[0]]
                         pool_out[channel_index, r2] = np.max(window)
                         max_index = np.unravel_index(window.argmax(), window.shape)
-                        max_map[f'{batch_index}_{channel_index}_{r2}_{c2}'] = (max_index[0] + r)
+                        max_map.append(((batch_index, channel_index, max_index[0] + r),
+                                        (batch_index, channel_index, r2)))
                     r2 = r2 + 1
         self.max_map = max_map
+        # print(input_tensor)
+        # print(pool_out)
+        # print(self.max_map)
         return pool_out
 
     def backward(self, error_tensor):
-
-        if len(error_tensor.shape) > 3:
-            y, x = error_tensor.shape[2], error_tensor.shape[3]
-        else:
-            y = error_tensor.shape[2]
-
         En_1 = np.zeros(self.input_shape)
-        for batch_index, error in enumerate(error_tensor):
-            for channel_index, channel in enumerate(error):
-                if len(error_tensor.shape) > 3:
-                    for y_index, x_index in zip(range(y), range(x)):
-                        index_tuple = self.max_map[f'{batch_index}_{channel_index}_{y_index}_{x_index}']
-                        En_1[batch_index, channel_index, index_tuple[0], index_tuple[1]] = error[channel_index, y_index, x_index]
 
-                else:
-                    for y_index in zip(range(y)):
-                        index_tuple = self.max_map[f'{batch_index}_{channel_index}_{y_index}']
-                        En_1[batch_index, channel_index, index_tuple[0]] = error[channel_index, y_index]
+        for orginal_shape, pool_shape in self.max_map:
+            if len(orginal_shape) > 3:
+                En_1[orginal_shape[0], orginal_shape[1], orginal_shape[2], orginal_shape[3]] += error_tensor[pool_shape[0], pool_shape[1], pool_shape[2], pool_shape[3]]
+
+            else:
+                En_1[orginal_shape[0], orginal_shape[1], orginal_shape[2]] += error_tensor[pool_shape[0], pool_shape[1], pool_shape[2]]
 
         return En_1
