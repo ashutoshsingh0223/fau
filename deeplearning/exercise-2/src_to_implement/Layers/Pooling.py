@@ -69,11 +69,11 @@ class Pooling(object):
                 if len(error_tensor.shape) > 3:
                     for y_index, x_index in zip(range(y), range(x)):
                         index_tuple = self.max_map[f'{batch_index}_{channel_index}_{y_index}_{x_index}']
-                        En_1[batch_index, channel_index, index_tuple[0], index_tuple[1]] += error[channel_index][y_index, x_index]
+                        En_1[batch_index, channel_index, index_tuple[0], index_tuple[1]] = error[channel_index, y_index, x_index]
 
                 else:
                     for y_index in zip(range(y)):
                         index_tuple = self.max_map[f'{batch_index}_{channel_index}_{y_index}']
-                        En_1[batch_index, channel_index, index_tuple[0]] += error[channel_index][y_index]
+                        En_1[batch_index, channel_index, index_tuple[0]] = error[channel_index, y_index]
 
         return En_1

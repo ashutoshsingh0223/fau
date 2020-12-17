@@ -38,7 +38,7 @@ class Conv(object):
 
     @optimizer.setter
     def optimizer(self, optmizer):
-        self._optimizer = optmizer
+        self._optimizer = copy.deepcopy(optmizer)
         self.bias_optimizer = copy.deepcopy(optmizer)
 
     def forward(self, input_tensor):
@@ -62,10 +62,10 @@ class Conv(object):
                 bias = self.bias[index] if len(self.bias) > 1 else self.bias
                 if len(self.convolution_shape) == 3:
                     aa = scipy.ndimage.correlate(
-                        image, kernel, mode='constant', cval=0)[int(self.num_channels/2)][::str_y, ::str_x] + bias
+                        image, kernel, mode='constant', cval=0)[int((self.num_channels)/2)][::str_y, ::str_x] + bias
                 elif len(self.convolution_shape) == 2:
                     aa = scipy.ndimage.correlate(
-                        image, kernel, mode='constant', cval=0)[int(self.num_channels/2)][::str_y] + bias
+                        image, kernel, mode='constant', cval=0)[int((self.num_channels)/2)][::str_y] + bias
 
                 if feature_maps is None:
                     feature_maps = np.zeros((self.weights.shape[0], *aa.shape))
@@ -117,47 +117,48 @@ class Conv(object):
 
         for img_index, error in enumerate(error_tensor):
             feature_maps = np.zeros((weights.shape[0], *input_shape[2:]))
-            upsample = any([i > e for i, e in zip(input_shape[2:], error.shape[1:])])
 
-            if upsample:
-                upsampled_error = np.zeros((error.shape[0], *input_shape[2:]))
-                if str_x is not None:
-                    for i in range(error.shape[0]):
-                        for y, x in zip(range(error.shape[1]), range(error.shape[2])):
-                            upsampled_error[i][y*str_y][x*str_x] = error[i][y][x]
-
-                else:
-                    for i in range(error.shape[0]):
-                        for y in range(error.shape[1]):
-                            upsampled_error[i][y*str_y] = error[i][y]
+            upsampled_error = np.zeros((error.shape[0], *input_shape[2:]))
+            if str_x is not None:
+                upsampled_error[:, ::str_y, ::str_x] = error
             else:
-                upsampled_error = error
+                upsampled_error[:, ::str_y] = error
 
             upsampled_error_tensor[img_index] = upsampled_error
-
             for index, kernel in enumerate(weights):
-                aa = scipy.ndimage.convolve(upsampled_error, kernel, mode='constant', cval=0)[int(self.num_kernels/2)]
-
-                if len(input_shape) == 4:
+                if len(weights.shape) > 3:
+                    aa = scipy.ndimage.convolve(upsampled_error, kernel[::-1], mode='constant', cval=0)[int((self.num_kernels)/2)]
                     feature_maps[index] = aa
                 else:
+                    aa = scipy.ndimage.convolve(upsampled_error, kernel, mode='constant', cval=0)[
+                        int((self.num_kernels) / 2)]
                     feature_maps[index] = aa
+
             if En_1 is None:
                 En_1 = np.zeros((error_tensor.shape[0], *feature_maps.shape))
             En_1[img_index] = feature_maps
 
         gradient_weights = np.zeros((self.num_kernels, *self.convolution_shape))
-        gradient_bias = sum(self.bias)
+
+        axes_b = list(range(len(error_tensor.shape)))
+        axes_b = [0] + axes_b[2:]
+        gradient_bias = np.sum(error_tensor, axis=tuple(axes_b))
 
         for img_index, image in enumerate(self.input_tensor):
-            kernel_by_2 = [(int(x/2), int(x/2)) if x % 2 != 0 else (int(x/2), int(x/2) - 1) for x in self.convolution_shape[1:]]
-            image = np.pad(image, ((0, 0), *kernel_by_2))
+            if len(self.convolution_shape) > 2:
+                y1 = int(np.floor((self.convolution_shape[1] - 1) / 2))
+                y2 = int(np.ceil((self.convolution_shape[1] - 1) / 2))
+                x1 = int(np.floor((self.convolution_shape[2] - 1) / 2))
+                x2 = int(np.ceil((self.convolution_shape[2] - 1) / 2))
+                image = np.pad(image, ((0, 0), (y1, y2), (x1, x2)))
+            else:
+                y1 = int(np.floor((self.convolution_shape[1] - 1) / 2))
+                y2 = int(np.ceil((self.convolution_shape[1] - 1) / 2))
+                image = np.pad(image, ((0, 0), (y1, y2)))
 
-            for error in upsampled_error_tensor:
-                for channel_index, error_channel in enumerate(error):
-                    aa = scipy.signal.correlate(image, error_channel.reshape(1, *error_channel.shape), mode='valid')
-                    # print(aa)
-                    gradient_weights[channel_index] += aa
+            for channel_index, error_channel in enumerate(upsampled_error_tensor[img_index]):
+                aa = scipy.signal.correlate(image, error_channel.reshape(1, *error_channel.shape), mode='valid')
+                gradient_weights[channel_index] += aa
 
         self._gradient_weights = gradient_weights
         self._gradient_bias = gradient_bias
