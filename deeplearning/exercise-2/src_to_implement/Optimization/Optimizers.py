@@ -16,7 +16,7 @@ class SgdWithMomentum(object):
         self.past_gradient = None
 
     def calculate_update(self, weight_tensor, gradient_tensor):
-        if self.past_gradient:
+        if self.past_gradient is not None:
             update = np.add(np.multiply(self.momentum_rate, self.past_gradient),
                                  np.multiply(self.learning_rate, gradient_tensor))
             weight_tensor = np.subtract(weight_tensor, update)
@@ -45,14 +45,13 @@ class Adam(object):
                        np.multiply(np.subtract(1., self.mu), gradient_tensor))
 
         if self.r_1 is None:
-            r = np.dot(np.subtract(1., self.rho) * gradient_tensor, gradient_tensor)
+            r = np.multiply(np.subtract(1., self.rho) * gradient_tensor, gradient_tensor)
         else:
             r = np.add(np.multiply(self.rho, self.r_1),
-                       np.dot(np.subtract(1., self.rho) * gradient_tensor, gradient_tensor))
+                       np.multiply(np.subtract(1., self.rho) * gradient_tensor, gradient_tensor))
 
         v_hat = v / np.add(np.subtract(1, np.power(self.mu, self.k)), np.finfo(float).eps)
         r_hat = r / np.add(np.subtract(1, np.power(self.rho, self.k)), np.finfo(float).eps)
-
         weight_tensor = weight_tensor - self.learning_rate * (v_hat / (np.sqrt(r_hat) + np.finfo(float).eps))
 
         self.v_1 = v

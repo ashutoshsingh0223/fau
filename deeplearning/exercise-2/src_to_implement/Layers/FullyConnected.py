@@ -23,8 +23,8 @@ class FullyConnected(object):
         return self._gradient_weights
 
     def initialize(self, weights_initializer, bias_initializer):
-        weights = weights_initializer.initialize((self.output_size, self.input_size), self.input_size, self.output_size).T
-        bias = bias_initializer.initialize((self.output_size, self.input_size), 1, self.output_size).T
+        weights = weights_initializer.initialize((self.input_size, self.output_size), self.input_size, self.output_size)
+        bias = bias_initializer.initialize((1, self.output_size), 1, self.output_size)
 
         self.weights = np.vstack((weights, bias))
 

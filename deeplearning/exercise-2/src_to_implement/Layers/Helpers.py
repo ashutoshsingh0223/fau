@@ -70,6 +70,9 @@ def gradient_check_weights(layers, input_tensor, label_tensor, bias):
             layers[0].weights = weights
         for layer in layers[:-1]:
             activation_tensor = layer.forward(activation_tensor)
+
+        # print(activation_tensor)
+        # print(label_tensor)
         layers[-1].forward(activation_tensor, label_tensor)
 
         error_tensor = layers[-1].backward(label_tensor)

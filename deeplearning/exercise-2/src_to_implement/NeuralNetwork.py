@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+from tqdm import tqdm
 
 
 class NeuralNetwork(object):
@@ -32,7 +33,7 @@ class NeuralNetwork(object):
         self.layers.append(layer)
 
     def train(self, iterations):
-        for iter in range(iterations):
+        for iter in tqdm(range(iterations)):
             loss = self.forward()
             self.backward()
             self.loss.append(loss)

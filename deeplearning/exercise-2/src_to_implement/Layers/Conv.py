@@ -1,5 +1,7 @@
 import numpy as np
 import scipy.ndimage
+import scipy.signal
+import copy
 
 
 class Conv(object):
@@ -12,11 +14,15 @@ class Conv(object):
         self.weights_shape = (num_kernels, *convolution_shape)
 
         self.weights = np.random.uniform(0, 1, self.weights_shape)
-        self.bias = None
+        self.bias = np.random.uniform(0, 1, (num_kernels,))
 
         self._gradient_weights = None
         self._gradient_bias = None
         self._optimizer = None
+
+        self.bias_optimizer = None
+
+        self.input_tensor = None
 
     @property
     def gradient_weights(self):
@@ -33,10 +39,12 @@ class Conv(object):
     @optimizer.setter
     def optimizer(self, optmizer):
         self._optimizer = optmizer
+        self.bias_optimizer = copy.deepcopy(optmizer)
 
     def forward(self, input_tensor):
         # batch * channels * height * width
         # batch * channels * height
+        self.input_tensor = input_tensor
 
         if type(self.stride_shape) is int:
             str_y, str_x = self.stride_shape, self.stride_shape
@@ -47,22 +55,17 @@ class Conv(object):
                 str_y = self.stride_shape[0]
 
         out = None
-        bias = self.bias if self.bias is not None else np.array([0])
+
         for img_index, image in enumerate(input_tensor):
             feature_maps = None
             for index, kernel in enumerate(self.weights):
+                bias = self.bias[index] if len(self.bias) > 1 else self.bias
                 if len(self.convolution_shape) == 3:
-                    if self.num_channels > 1:
-                        aa = scipy.ndimage.convolve(
-                            image, kernel, mode='constant', cval=0)[self.num_channels - 2][::str_y, ::str_x] + bias
-                    else:
-                        aa = scipy.ndimage.convolve(image, kernel, mode='constant', cval=0)[::str_y, ::str_x] + bias
+                    aa = scipy.ndimage.correlate(
+                        image, kernel, mode='constant', cval=0)[int(self.num_channels/2)][::str_y, ::str_x] + bias
                 elif len(self.convolution_shape) == 2:
-                    if self.num_channels > 1:
-                        aa = scipy.ndimage.convolve(
-                            image, kernel, mode='constant', cval=0)[self.num_channels - 2][::str_y] + bias
-                    else:
-                        aa = scipy.ndimage.convolve(image, kernel, mode='constant', cval=0)[::str_y] + bias
+                    aa = scipy.ndimage.correlate(
+                        image, kernel, mode='constant', cval=0)[int(self.num_channels/2)][::str_y] + bias
 
                 if feature_maps is None:
                     feature_maps = np.zeros((self.weights.shape[0], *aa.shape))
@@ -74,22 +77,96 @@ class Conv(object):
         return out
 
     def initialize(self, weights_initializer, bias_initializer):
+        # print(self.weights.shape)
+        # print(self.bias.shape)
         weights = weights_initializer.initialize(self.weights_shape,
                                                  np.prod(self.convolution_shape),
                                                  np.prod(self.convolution_shape[1:]) * self.num_kernels)
-        bias = bias_initializer.initialize((1, 1), 1, 1)
+        bias = bias_initializer.initialize((self.num_kernels, ), self.num_kernels, 1)
+        # print(weights.shape)
+        # print(bias.shape)
 
         self.weights = weights
         self.bias = bias
 
     def backward(self, error_tensor):
-        # We have to return En-1 from here for En, gradient w.r.t to input vector
-        En_1 = np.dot(self.weights[:-1], error_tensor.T)
+        # print(error_tensor)
+        # Weights shape = (# kernels, # channels, y, x)
+        # To compute En_1. Channel 1 of En_1 depends on channel 1 of all the kernels, similarly
+        # channel h of En_1 depends only on the hth channel of all H kernels.
+        # So transposing along dimensions 0 and 1
+        axes = list(range(len(self.weights.shape)))
+        axes = [1, 0] + axes[2:]
+        weights = np.transpose(self.weights, axes=axes)
+        # convolution shape is now (# kernels, y, x)
+        convolution_shape = weights.shape[1:]
 
-        # Gradient of error w.r.t weights
-        self._gradient_weights = np.dot(error_tensor.T, self.input_tensor).T
+        str_x = None
+        if type(self.stride_shape) is int:
+            str_y, str_x = self.stride_shape, self.stride_shape
+        else:
+            if len(self.stride_shape) == 2:
+                str_y, str_x = self.stride_shape[0], self.stride_shape[1]
+            else:
+                str_y = self.stride_shape[0]
+
+        En_1 = None
+        input_shape = self.input_tensor.shape
+
+        upsampled_error_tensor = np.zeros((*error_tensor.shape[:2], *input_shape[2:]))
+
+        for img_index, error in enumerate(error_tensor):
+            feature_maps = np.zeros((weights.shape[0], *input_shape[2:]))
+            upsample = any([i > e for i, e in zip(input_shape[2:], error.shape[1:])])
+
+            if upsample:
+                upsampled_error = np.zeros((error.shape[0], *input_shape[2:]))
+                if str_x is not None:
+                    for i in range(error.shape[0]):
+                        for y, x in zip(range(error.shape[1]), range(error.shape[2])):
+                            upsampled_error[i][y*str_y][x*str_x] = error[i][y][x]
+
+                else:
+                    for i in range(error.shape[0]):
+                        for y in range(error.shape[1]):
+                            upsampled_error[i][y*str_y] = error[i][y]
+            else:
+                upsampled_error = error
+
+            upsampled_error_tensor[img_index] = upsampled_error
+
+            for index, kernel in enumerate(weights):
+                aa = scipy.ndimage.convolve(upsampled_error, kernel, mode='constant', cval=0)[int(self.num_kernels/2)]
+
+                if len(input_shape) == 4:
+                    feature_maps[index] = aa
+                else:
+                    feature_maps[index] = aa
+            if En_1 is None:
+                En_1 = np.zeros((error_tensor.shape[0], *feature_maps.shape))
+            En_1[img_index] = feature_maps
+
+        gradient_weights = np.zeros((self.num_kernels, *self.convolution_shape))
+        gradient_bias = sum(self.bias)
+
+        for img_index, image in enumerate(self.input_tensor):
+            kernel_by_2 = [(int(x/2), int(x/2)) if x % 2 != 0 else (int(x/2), int(x/2) - 1) for x in self.convolution_shape[1:]]
+            image = np.pad(image, ((0, 0), *kernel_by_2))
+
+            for error in upsampled_error_tensor:
+                for channel_index, error_channel in enumerate(error):
+                    aa = scipy.signal.correlate(image, error_channel.reshape(1, *error_channel.shape), mode='valid')
+                    # print(aa)
+                    gradient_weights[channel_index] += aa
+
+        self._gradient_weights = gradient_weights
+        self._gradient_bias = gradient_bias
+
         if self._optimizer:
+            # print(self.bias.shape)
+            # print(self._gradient_bias)
             self.weights = self._optimizer.calculate_update(self.weights, self._gradient_weights)
+            self.bias = self.bias_optimizer.calculate_update(self.bias, self._gradient_bias)
 
-        return En_1.T
+        return En_1
 

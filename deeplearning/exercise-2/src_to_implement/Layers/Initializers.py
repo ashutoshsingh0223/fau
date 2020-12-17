@@ -7,7 +7,7 @@ class Constant(object):
         self.value = value
 
     def initialize(self, weights_shape, fan_in, fan_out):
-        weights = np.empty((fan_out, fan_in))
+        weights = np.empty(weights_shape)
         weights.fill(self.value)
         return weights.copy()
 
@@ -19,7 +19,7 @@ class UniformRandom(object):
         self.upper = upper
 
     def initialize(self, weights_shape, fan_in, fan_out):
-        weights = np.random.uniform(self.lower, self.upper, (fan_out, fan_in))
+        weights = np.random.uniform(self.lower, self.upper, weights_shape)
         return weights.copy()
 
 
@@ -30,7 +30,7 @@ class Xavier(object):
 
     def initialize(self, weights_shape, fan_in, fan_out):
         sigma = np.sqrt(np.divide(2, (fan_out + fan_in)))
-        weights = np.random.normal(0, sigma, (fan_out, fan_in))
+        weights = np.random.normal(0, sigma, weights_shape)
         return weights.copy()
 
 
@@ -41,5 +41,5 @@ class He(object):
 
     def initialize(self, weights_shape, fan_in, fan_out):
         sigma = np.sqrt(np.divide(2, fan_in))
-        weights = np.random.normal(0, sigma, (fan_out, fan_in))
+        weights = np.random.normal(0, sigma, weights_shape)
         return weights.copy()
