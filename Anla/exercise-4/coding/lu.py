@@ -15,8 +15,8 @@ def lu(A):
 
 def lu_complete(A):
     n = len(A)
-    U = A
-    L = np.eye(n)
+    U = A.astype(np.complex)
+    L = np.eye(n).astype(np.complex)
     P = np.eye(n)
     Q = np.eye(n)
     for k in range(n - 1):
