@@ -3,8 +3,8 @@ import numpy as np
 
 def lu(A):
     n = len(A)
-    U = A
-    L = np.eye(n)
+    U = A.astype(np.complex)
+    L = np.eye(n).astype(np.complex)
     for k in range(n - 1):
         for j in range(k + 1, n):
             l_j_k = U[j, k] / U[k, k]
