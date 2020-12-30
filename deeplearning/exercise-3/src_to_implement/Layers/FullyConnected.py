@@ -1,7 +1,8 @@
 import numpy as np
+from Layers.Base import BaseLayer
 
 
-class FullyConnected(object):
+class FullyConnected(BaseLayer):
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size

@@ -1,7 +1,8 @@
 import numpy as np
+from Layers.Base import BaseLayer
 
 
-class Pooling(object):
+class Pooling(BaseLayer):
     def __init__(self, stride_shape, pooling_shape):
         self.input_shape = None
         self.stride_shape = stride_shape

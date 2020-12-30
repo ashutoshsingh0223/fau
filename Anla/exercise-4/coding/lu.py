@@ -40,5 +40,4 @@ def lu_complete(A):
             U[j, k:] = U[j, k:] - l_j_k * U[k, k:]
             L[j, k] = l_j_k
 
-
     return (P, Q, L, U)

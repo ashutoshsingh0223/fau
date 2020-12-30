@@ -14,13 +14,13 @@ class NeuralNetwork(object):
         self.weights_initializer = weights_initializer
         self.bias_initializer = bias_initializer
 
-    @property
-    def phase(self):
-        pass
+    def phase(self, layer, phase):
+        layer.testing_phase = phase
 
     def forward(self):
         out, self.label_tensor = self.data_layer.next()
         for index in range(len(self.layers)):
+            self.phase(self.layers[index], 'train')
             out = self.layers[index].forward(out)
         out = self.loss_layer.forward(out, self.label_tensor)
         return out
@@ -44,5 +44,6 @@ class NeuralNetwork(object):
 
     def test(self, input_tensor):
         for index in range(len(self.layers)):
+            self.phase(self.layers[index], 'test')
             input_tensor = self.layers[index].forward(input_tensor)
         return input_tensor

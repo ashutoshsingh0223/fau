@@ -1,7 +1,8 @@
 import numpy as np
+from Layers.Base import BaseLayer
 
 
-class ReLU(object):
+class ReLU(BaseLayer):
     def __init__(self):
         self.less_than_zero = None
 

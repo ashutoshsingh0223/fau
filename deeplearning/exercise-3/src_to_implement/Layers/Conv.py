@@ -2,9 +2,10 @@ import numpy as np
 import scipy.ndimage
 import scipy.signal
 import copy
+from Layers.Base import BaseLayer
 
 
-class Conv(object):
+class Conv(BaseLayer):
     def __init__(self, stride_shape, convolution_shape, num_kernels):
         self.stride_shape = stride_shape
         self.convolution_shape = convolution_shape

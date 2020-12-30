@@ -1,3 +1,4 @@
+import numpy as np
 
 
 class L1_Regularizer(object):
@@ -5,10 +6,11 @@ class L1_Regularizer(object):
         self.alpha = alpha
 
     def calculate_gradient(self, weights):
-        pass
+        return self.alpha * np.sign(weights)
 
     def norm(self, weights):
-        pass
+        w_1 = np.sum(np.abs(weights)) * self.alpha
+        return w_1
 
 
 class L2_Regularizer(object):
@@ -16,7 +18,8 @@ class L2_Regularizer(object):
         self.alpha = alpha
 
     def calculate_gradient(self, weights):
-        pass
+        return self.alpha * weights
 
     def norm(self, weights):
-        pass
+        w_2 = np.square(np.linalg.norm(weights, ord='fro')) * self.alpha
+        return w_2

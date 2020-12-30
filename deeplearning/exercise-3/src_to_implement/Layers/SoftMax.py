@@ -1,7 +1,8 @@
 import numpy as np
+from Layers.Base import BaseLayer
 
 
-class SoftMax(object):
+class SoftMax(BaseLayer):
     def __init__(self):
         self.activation_values = None
 

@@ -1,7 +1,7 @@
-import numpy as np
+from Layers.Base import BaseLayer
 
 
-class Flatten(object):
+class Flatten(BaseLayer):
     def __init__(self):
         self.input_shape = None
 

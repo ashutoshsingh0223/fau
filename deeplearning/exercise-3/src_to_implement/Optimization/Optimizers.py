@@ -12,7 +12,7 @@ class Optimizer(ABC):
     def calculate_update(self, weight_tensor, gradient_tensor):
         raise NotImplementedError
 
-    def regularizer(self, regularizer):
+    def add_regularizer(self, regularizer):
         self.regularizer = regularizer
 
 
@@ -22,7 +22,10 @@ class Sgd(Optimizer):
         self.learning_rate = learning_rate
 
     def calculate_update(self, weight_tensor, gradient_tensor):
-        return weight_tensor - self.learning_rate * gradient_tensor
+        weight_tensor_ = weight_tensor - self.learning_rate * gradient_tensor
+        if self.regularizer:
+            weight_tensor_ = weight_tensor_ - self.learning_rate * self.regularizer.calculate_gradient(weight_tensor)
+        return weight_tensor_
 
 
 class SgdWithMomentum(Optimizer):
@@ -36,13 +39,15 @@ class SgdWithMomentum(Optimizer):
         if self.past_gradient is not None:
             update = np.add(np.multiply(self.momentum_rate, self.past_gradient),
                                  np.multiply(self.learning_rate, gradient_tensor))
-            weight_tensor = np.subtract(weight_tensor, update)
         else:
             update = np.multiply(self.learning_rate, gradient_tensor)
-            weight_tensor = np.subtract(weight_tensor, update)
+
+        weight_tensor_ = np.subtract(weight_tensor, update)
+        if self.regularizer:
+            weight_tensor_ = weight_tensor_ - self.learning_rate * self.regularizer.calculate_gradient(weight_tensor)
 
         self.past_gradient = update
-        return weight_tensor.copy()
+        return weight_tensor_.copy()
 
 
 class Adam(Optimizer):
@@ -70,10 +75,13 @@ class Adam(Optimizer):
 
         v_hat = v / np.add(np.subtract(1, np.power(self.mu, self.k)), np.finfo(float).eps)
         r_hat = r / np.add(np.subtract(1, np.power(self.rho, self.k)), np.finfo(float).eps)
-        weight_tensor = weight_tensor - self.learning_rate * (v_hat / (np.sqrt(r_hat) + np.finfo(float).eps))
+        weight_tensor_ = weight_tensor - self.learning_rate * (v_hat / (np.sqrt(r_hat) + np.finfo(float).eps))
 
         self.v_1 = v
         self.r_1 = r
         self.k += 1
 
-        return weight_tensor.copy()
+        if self.regularizer:
+            weight_tensor_ = weight_tensor_ - self.learning_rate * self.regularizer.calculate_gradient(weight_tensor)
+
+        return weight_tensor_.copy()
