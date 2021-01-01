@@ -4,6 +4,7 @@ from Layers.Base import BaseLayer
 
 class Pooling(BaseLayer):
     def __init__(self, stride_shape, pooling_shape):
+        super(Pooling, self).__init__()
         self.input_shape = None
         self.stride_shape = stride_shape
         self.pooling_shape = pooling_shape

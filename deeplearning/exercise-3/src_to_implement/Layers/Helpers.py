@@ -10,7 +10,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.datasets import load_iris, load_digits
 
 
-def gradient_check(layers, input_tensor, label_tensor, seed = None):
+def gradient_check(layers, input_tensor, label_tensor, seed=None):
     epsilon = 1e-5
     difference = np.zeros_like(input_tensor)
 

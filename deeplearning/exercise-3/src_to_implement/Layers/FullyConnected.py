@@ -4,6 +4,7 @@ from Layers.Base import BaseLayer
 
 class FullyConnected(BaseLayer):
     def __init__(self, input_size, output_size):
+        super(FullyConnected, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
         self.weights = np.random.uniform(0, 1, (input_size+1, output_size))

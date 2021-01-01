@@ -4,6 +4,7 @@ from Layers.Base import BaseLayer
 
 class SoftMax(BaseLayer):
     def __init__(self):
+        super(SoftMax, self).__init__()
         self.activation_values = None
 
     def forward(self, input_tensor):

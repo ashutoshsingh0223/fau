@@ -20,7 +20,7 @@ class NeuralNetwork(object):
     def forward(self):
         out, self.label_tensor = self.data_layer.next()
         for index in range(len(self.layers)):
-            self.phase(self.layers[index], 'train')
+            self.phase(self.layers[index], False)
             out = self.layers[index].forward(out)
         out = self.loss_layer.forward(out, self.label_tensor)
         return out
@@ -44,6 +44,6 @@ class NeuralNetwork(object):
 
     def test(self, input_tensor):
         for index in range(len(self.layers)):
-            self.phase(self.layers[index], 'test')
+            self.phase(self.layers[index], True)
             input_tensor = self.layers[index].forward(input_tensor)
         return input_tensor

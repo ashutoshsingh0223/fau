@@ -13,6 +13,5 @@ class BaseLayer(ABC):
     def backward(self):
         raise NotImplementedError
 
-    @abstractmethod
     def initialize(self):
         raise NotImplementedError
