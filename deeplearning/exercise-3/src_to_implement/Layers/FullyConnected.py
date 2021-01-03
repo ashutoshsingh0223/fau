@@ -7,7 +7,7 @@ class FullyConnected(BaseLayer):
         super(FullyConnected, self).__init__()
         self.input_size = input_size
         self.output_size = output_size
-        self.weights = np.random.uniform(0, 1, (input_size+1, output_size))
+        self._weights = np.random.uniform(0, 1, (input_size+1, output_size))
         self._optimizer = None
         self.input_tensor = None
         self._gradient_weights = None
@@ -15,6 +15,14 @@ class FullyConnected(BaseLayer):
     @property
     def optimizer(self):
         return self._optimizer
+
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, weights):
+        self._weights = weights
 
     @optimizer.setter
     def optimizer(self, optmizer):
@@ -36,12 +44,18 @@ class FullyConnected(BaseLayer):
         w_t_x = np.dot(self.weights.T, self.input_tensor.T).T
         return np.copy(w_t_x)
 
-    def backward(self, error_tensor):
+    def backward(self, error_tensor, x=True):
         # We have to return En-1 from here for En, gradient w.r.t to input vector
         En_1 = np.dot(self.weights[:-1], error_tensor.T)
 
         # Gradient of error w.r.t weights
+        if not x:
+            print(f'e:{error_tensor}')
+            print(self.input_tensor)
         self._gradient_weights = np.dot(error_tensor.T, self.input_tensor).T
+        if not x:
+            print(self._gradient_weights)
+
         if self._optimizer:
             self.weights = self._optimizer.calculate_update(self.weights, self._gradient_weights)
 
