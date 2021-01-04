@@ -1,3 +1,5 @@
 On the Iris dataset using Dropout, we achieve an accuracy of: 96.0%
 On the Iris dataset, we achieve an accuracy of: 96.0%
 On the Iris dataset, we achieve an accuracy of: 100.0%
+On the Iris dataset using Batchnorm, we achieve an accuracy of: 100.0%
+On the Iris dataset using Batchnorm, we achieve an accuracy of: 96.0%
