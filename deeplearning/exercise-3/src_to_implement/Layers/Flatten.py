@@ -3,6 +3,7 @@ from Layers.Base import BaseLayer
 
 class Flatten(BaseLayer):
     def __init__(self):
+        super(Flatten, self).__init__()
         self.input_shape = None
 
     def forward(self, input_tensor):

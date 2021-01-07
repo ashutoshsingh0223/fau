@@ -15,20 +15,15 @@ class Conv(BaseLayer):
 
         self.weights_shape = (num_kernels, *convolution_shape)
 
-        self.weights = np.random.uniform(0, 1, self.weights_shape)
+        self._weights = np.random.uniform(0, 1, self.weights_shape)
         self.bias = np.random.uniform(0, 1, (num_kernels,))
 
-        self._gradient_weights = None
         self._gradient_bias = None
         self._optimizer = None
 
         self.bias_optimizer = None
-
         self.input_tensor = None
 
-    @property
-    def gradient_weights(self):
-        return self._gradient_weights
 
     @property
     def gradient_bias(self):

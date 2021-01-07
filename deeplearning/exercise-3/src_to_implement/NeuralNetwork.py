@@ -29,7 +29,21 @@ class NeuralNetwork(object):
         En = self.loss_layer.backward(self.label_tensor)
         last_index = len(self.layers) - 1
         for index in range(len(self.layers)):
-            En = self.layers[last_index - index].backward(En)
+            layer = self.layers[last_index - index]
+            if layer.optimizer:
+                if layer.optimizer.regularizer:
+                    regu_loss = layer.optimizer.regularizer.norm(layer.weights)
+                    if En.ndim == 2:
+                        En = En + regu_loss
+                    else:
+                        if En.ndim == 3:
+                            axes = (0, 2, 1)
+                            En = np.transpose(En, axes=axes) + regu_loss
+                            En = np.transpose(En, axes=axes)
+                        else:
+                            En = np.transpose(En, axes=(0, 2, 3, 1)) + regu_loss
+                            En = np.transpose(En, axes=(0, 3, 1, 2))
+            En = layer.backward(En)
 
     def append_trainable_layer(self, layer):
         layer.optimizer = copy.deepcopy(self.optimizer)
