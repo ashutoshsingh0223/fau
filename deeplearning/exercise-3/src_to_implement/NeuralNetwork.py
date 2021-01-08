@@ -13,16 +13,24 @@ class NeuralNetwork(object):
         self.label_tensor = None
         self.weights_initializer = weights_initializer
         self.bias_initializer = bias_initializer
+        self.regu_loss = np.zeros((1, 1))
 
     def phase(self, layer, phase):
         layer.testing_phase = phase
 
     def forward(self):
         out, self.label_tensor = self.data_layer.next()
+        self.regu_loss = np.zeros((len(self.layers,)))
         for index in range(len(self.layers)):
-            self.phase(self.layers[index], False)
-            out = self.layers[index].forward(out)
-        out = self.loss_layer.forward(out, self.label_tensor)
+            layer = self.layers[index]
+            self.phase(layer, False)
+            out = layer.forward(out)
+            if layer.optimizer:
+                if layer.optimizer.regularizer:
+                    regu_loss = layer.optimizer.regularizer.norm(layer.weights)
+                    self.regu_loss[index] = regu_loss
+
+        out = self.loss_layer.forward(out, self.label_tensor) + np.sum(self.regu_loss)
         return out
 
     def backward(self):
@@ -30,19 +38,6 @@ class NeuralNetwork(object):
         last_index = len(self.layers) - 1
         for index in range(len(self.layers)):
             layer = self.layers[last_index - index]
-            if layer.optimizer:
-                if layer.optimizer.regularizer:
-                    regu_loss = layer.optimizer.regularizer.norm(layer.weights)
-                    if En.ndim == 2:
-                        En = En + regu_loss
-                    else:
-                        if En.ndim == 3:
-                            axes = (0, 2, 1)
-                            En = np.transpose(En, axes=axes) + regu_loss
-                            En = np.transpose(En, axes=axes)
-                        else:
-                            En = np.transpose(En, axes=(0, 2, 3, 1)) + regu_loss
-                            En = np.transpose(En, axes=(0, 3, 1, 2))
             En = layer.backward(En)
 
     def append_trainable_layer(self, layer):

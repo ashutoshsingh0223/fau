@@ -26,6 +26,12 @@ class RNN(BaseLayer):
         self.tanh = TanH()
         self.output = FullyConnected(hidden_size, output_size)
         self.sigmoid = Sigmoid()
+        self.regu_loss = 0.0
+
+    def calculate_regularization_loss(self, layer):
+        if self._optimizer:
+            if self._optimizer.regularizer:
+                self.regu_loss += self._optimizer.regularizer.norm(layer.weights)
 
     def forward(self, input_tensor):
         self.tanh_activations = np.zeros((input_tensor.shape[0], self.hidden_size)).astype(np.float)
@@ -39,26 +45,29 @@ class RNN(BaseLayer):
             input_vector = input_tensor[t]
             if self.ht_1 is None:
                 self.ht_1 = np.zeros((1, self.hidden_size))
-                self._memorize = True
+                # self._memorize = True
             input_vector = input_vector.reshape(1, -1)
 
             input_vector = np.hstack((input_vector, self.ht_1))
 
             h_t = self.input.forward(input_vector)
+            self.calculate_regularization_loss(self.input)
             self.cocatenated_input[t] = self.input.input_tensor
 
             h_t = self.tanh.forward(h_t)
-            self.tanh_activations[t] = h_t.copy()
+            self.tanh_activations[t] = self.tanh.activations
 
             self.ht_1 = h_t.copy()
 
             y_t = self.output.forward(h_t)
+            self.calculate_regularization_loss(self.input)
             self.output_input[t] = self.output.input_tensor
 
             y_t = self.sigmoid.forward(y_t)
-            self.sigmoid_activations[t] = y_t.copy()
+            self.sigmoid_activations[t] = self.sigmoid.activations
 
-            output_tensor[t] = y_t[0]
+            output_tensor[t] = y_t[0] + self.regu_loss
+            self.regu_loss = 0
 
         if not self._memorize:
             self.ht_1 = None
@@ -72,9 +81,6 @@ class RNN(BaseLayer):
     def memorize(self, memorize):
         self._memorize = memorize
 
-    def calculate_regularization_loss(self):
-        pass
-
     def initialize(self, weights_init, bias_init):
         self.input.initialize(weights_init, bias_init)
         self.output.initialize(weights_init, bias_init)
@@ -83,7 +89,7 @@ class RNN(BaseLayer):
     def backward(self, error_tensor):
         En_1 = np.zeros((error_tensor.shape[0], self.input_size)).astype(np.float)
 
-        h_grad = np.zeros((1, self.hidden_size))
+        h_grad = self.ht_1 or np.zeros((1, self.hidden_size))
 
         gradient_weights = np.zeros(self.input.weights.shape).astype(np.float)
         total_gradient_weights_out = np.zeros(self.output.weights.shape).astype(np.float)
@@ -118,11 +124,9 @@ class RNN(BaseLayer):
 
         self._gradient_weights = gradient_weights
 
-        # print(self.gradient_weights)
-
         if self._optimizer:
             self.input.weights = self._optimizer.calculate_update(self.input.weights.copy(), gradient_weights)
             self.output.weights = self._optimizer.calculate_update(self.output.weights.copy(), total_gradient_weights_out)
-            self._weights = self.input_weights
+            self._weights = self.input.weights
 
         return En_1
