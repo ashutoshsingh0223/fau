@@ -17,7 +17,7 @@ class FullyConnected(BaseLayer):
 
     def forward(self, input_tensor):
         x_0 = np.ones((1, input_tensor.shape[0]))
-        self.input_tensor = np.hstack((input_tensor, x_0.T))
+        self.input_tensor = np.hstack((input_tensor, x_0.T)).copy()
         w_t_x = np.dot(self.weights.T, self.input_tensor.T).T
         return np.copy(w_t_x)
 
@@ -26,7 +26,7 @@ class FullyConnected(BaseLayer):
         En_1 = np.dot(error_tensor, self.weights[:-1].T)
         # print(f'e-shape: {En_1.shape}')
         # Gradient of error w.r.t weights
-        self._gradient_weights = np.dot(error_tensor.T, self.input_tensor).T
+        self._gradient_weights = np.dot(self.input_tensor.T, error_tensor)
 
         if self._optimizer:
             self.weights = self._optimizer.calculate_update(self.weights, self._gradient_weights)

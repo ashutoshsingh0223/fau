@@ -9,7 +9,7 @@ class TanH(BaseLayer):
 
     def forward(self, input_tensor):
         self.activations = np.tanh(input_tensor)
-        return self.activations
+        return self.activations.copy()
 
     def backward(self, error_tensor):
         return np.multiply(error_tensor, np.subtract(1, np.square(self.activations)))
