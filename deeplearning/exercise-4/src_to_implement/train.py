@@ -31,7 +31,7 @@ print('Loading Resnet model')
 # TODO
 criterion_loss = nn.BCELoss()
 optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
-trainer = Trainer(model=model, crit= criterion_loss, optim=optimizer,
+trainer = Trainer(model=model, crit=criterion_loss, optim=optimizer,
                   train_dl=train_dataset, val_test_dl=validation_dataset,
                   cuda=True) ### add early stopping also
 

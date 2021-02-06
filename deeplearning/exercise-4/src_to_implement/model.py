@@ -4,13 +4,21 @@ from torch.nn import functional as F
 from torch import flatten
 
 class ResBlock(nn.Module):
-    def __init__(self ,in_channel ,out_channel , stride = 1 , downsample = None):
+    def __init__(self ,in_channels, out_channels , stride):
         super(ResBlock,self).__init__()
-        self.cv1= nn.Conv2d(in_channel , out_channel , stride )
-        self.bn1 = nn.BatchNorm2d(out_channel)
-        self.relu = nn.ReLU(inplace=True)
-        self.cv2 = nn.Conv2d(in_channel,out_channel,stride)
-        self.bn2 = nn.BatchNorm2d(out_channel)
+        # nn.Conv2d(in_channels, out_channels, filter_size=3, stride)
+        self.out_channels = out_channels
+        self.stride = stride
+        self.cv1= nn.Conv2d(in_channels, out_channels , 3, stride)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu1 = nn.ReLU(inplace=True)
+        self.cv2 = nn.Conv2d(out_channels, out_channels, 3)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.relu2 = nn.ReLU(inplace=True)
+
+        self.residual_conv = nn.Conv2d(out_channels , 1, stride)
+        self.residual_norm = nn.Conv2d(out_channels)
+
         self.downsample = downsample
 
     def forward(self , x):
@@ -20,11 +28,15 @@ class ResBlock(nn.Module):
          l = self.relu(l)
          l = self.cv2(l)
          l = self.bn2(l)
-         if self.downsample:
-             residual = self.downsample(x)
+         l = self.relu2(l)
+
+         residual = self.residual_norm(self.residual_conv(residual))
          l += residual
-         l = self.relu(l)  #doubt here
          return l
+
+    def __call__(self, x):
+        return self.forward(x)
+
 'Resnet'
 class ResNet(nn.Module):
     def __init__(self):
@@ -53,7 +65,7 @@ class ResNet(nn.Module):
         out = flatten(out, start_dim=1)
         out = self.fc(out)
         out =  F.sigmoid(out)
-        return (out)
+        return out
 
 
 

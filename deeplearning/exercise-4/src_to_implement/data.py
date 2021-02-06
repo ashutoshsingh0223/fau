@@ -12,7 +12,7 @@ train_std = [0.16043035, 0.16043035, 0.16043035]
 
 
 class ChallengeDataset(Dataset):
-    def __init__(self, data: pandas.dataframe, mode: str):
+    def __init__(self, data: pandas.DataFrame, mode: str):
         self._transform: tv.transforms.Compose = tv.transforms.Compose([
             tv.transforms.ToPILImage(),
             tv.transforms.ToTensor(),
@@ -29,12 +29,18 @@ class ChallengeDataset(Dataset):
         if torch.is_tensor(index):
             index = index.tolist()
 
-        img_name = self.landmarks_frame.iloc[index, 0]
+        img_name = self.data.iloc[index, 0]
+        label = self.data.iloc[index, 1]
         image = imread(img_name)
         image = gray2rgb(image)
 
         if self._transform:
             image = self._transform(image)
-        return image
+
+        if label == 1:
+            label = torch.tensor([0, 1])
+        else:
+            label = torch.tensor([1, 0])
+        return image, label
 
 
