@@ -2,6 +2,8 @@ import torch as t
 from torch import nn
 from src_to_implement.data import ChallengeDataset
 from src_to_implement.trainer import Trainer
+from src_to_implement.EarlyStopping import EarlyStopping
+
 from matplotlib import pyplot as plt
 import numpy as np
 from src_to_implement.model import ResNet
@@ -31,12 +33,16 @@ print('Loading Resnet model')
 # TODO
 criterion_loss = nn.BCELoss()
 optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
+
+patience = 5
+early_stopping = EarlyStopping(patience=patience)
+
 trainer = Trainer(model=model, crit=criterion_loss, optim=optimizer,
                   train_dl=train_dataset, val_test_dl=validation_dataset,
-                  cuda=True) ### add early stopping also
+                  cuda=True, early_stopping_patience=early_stopping.patience, early_stopping_crit=early_stopping)
 
 # go, go, go... call fit on trainer
-res = trainer.fit(stop_limit)
+res = trainer.fit(epochs=epochs)
 
 # plot the results
 plt.plot(np.arange(len(res[0])), res[0], label='train loss')

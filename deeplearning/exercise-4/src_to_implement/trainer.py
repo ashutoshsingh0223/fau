@@ -12,7 +12,8 @@ class Trainer:
                  train_dl=None,                # Training data set
                  val_test_dl=None,             # Validation (or test) data set
                  cuda=True,                    # Whether to use the GPU
-                 early_stopping_patience=-1):  # The patience for early stopping
+                 early_stopping_patience=-1,
+                 early_stopping_crit=None):  # The patience for early stopping
         self._model = model
         self._crit = crit
         self._optim = optim
@@ -21,6 +22,7 @@ class Trainer:
         self._cuda = cuda
 
         self._early_stopping_patience = early_stopping_patience
+        self._early_stopping_crit = early_stopping_crit
 
         if cuda:
             self._model = model.cuda()
@@ -51,11 +53,7 @@ class Trainer:
             
     def train_step(self, x, y):
 
-        # perform following steps:
-        # -reset the gradients
-        self._optim.zero_grad()  #clear old gradients from the last step
-        # -propagate through the network
-        self._model.train()
+        # perform following steps
         predict_y = self._model(x)
         # -calculate the loss
         loss_val= self._crit(predict_y,y)  ## Loss function crit
@@ -66,7 +64,6 @@ class Trainer:
         # -return the loss
         #return loss_val #error
         return float(loss_val)
-        #TODO
     
     def val_test_step(self, x, y):
         # predict
@@ -76,7 +73,6 @@ class Trainer:
         self._model.eval()
         # return the loss and the predictions
         return float(loss_val), predict_y
-        #TODO
         
     def train_epoch(self):
         # set training mode
@@ -84,11 +80,7 @@ class Trainer:
         # transfer the batch to "cuda()" -> the gpu if a gpu is given
         # perform a training step
         # calculate the average loss for the epoch and return it
-        #TODO
         self._model.train()
-        self._optim.zero_grad()
-        x=[]
-        y=[]
         loss_for_epoch = 0.0
         for x ,y in tqdm(iter(self._train_dl)):  #batch and labels
             if self._cuda:
@@ -96,51 +88,37 @@ class Trainer:
                 y = y.cuda()
             x_tensor= t.tensor(x)
             y_tensor= t.tensor(y)
+            self._optim.zero_grad()
             loss = self.train_step(x_tensor ,y_tensor)
             loss_for_epoch = loss_for_epoch + loss
             print('----> Final Loss train: ', final_val)
 
         return loss_for_epoch / len(self._train_dl_)
 
-    def calculate_tp(self):
-        pass
-
-    def calculate_fp(self):
-        pass
-
-    def calculate_tn(self):
-        pass
-
-    def calculate_fn(self):
-        pass
-
-    def calculate_precision(self, true_labels, predicted_labels):
-        pass
-
-    def calculate_recall(self, true_labels, predicted_labels):
-        pass
-
-    def calculate_accuracy(self, true_labels, predicted_labels):
-        pass
-
     def calculate_f1score(self, true_labels, predicted_labels):
-        pass
+        f1 = f1_score(true_labels, predicted_labels)
+        return f1
     
     def val_test(self):
         self._model.eval() #doubt
         self._optim.zero_grad()
         eval_loss = 0.0
-        f1_total_metrics = 0
+        true_labels = []
+        predicted_labels = []
         for x, y in tqdm(iter(self._val_test_dl)):
+            max, indices = t.max(y, 0)
+            true_labels.append(indices)
             if self._cuda:
                 x = x.cuda()
                 y = y.cuda()
             x_tensor = t.tensor(x)
             y_tensor = t.tensor(y)
             loss, y_predicted = self.val_test_step(x_tensor,y_tensor)
+            p_max, p_indices = t.max(y, 0)
+            predicted_labels.append(p_indices)
             eval_loss = eval_loss + loss
-            #f1 score calculation
         eval_loss = eval_loss / len(self._val_test_dl)
+        f1 = self.calculate_f1score(true_labels=true_labels, predicted_labels=predicted_labels)
         # set eval mode
         # disable gradient computation
         # iterate through the validation set
@@ -150,24 +128,36 @@ class Trainer:
         # calculate the average loss and average metrics of your choice. You might want to calculate these
         # metrics in designated functions
         # return the loss and print the calculated metrics
-        return eval_loss
+        return eval_loss, f1
         
     
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
         epoch_counter = 0
         validation_loss = []
-        train_loss = []
+        training_loss = []
         while True:
-            break
-
+            train_loss = self.train_epoch()
+            training_loss.append(train_loss)
+            val_loss, f1 = self.val_test()
+            if validation_loss:
+                min_val_loss_till_now = min(validation_loss)
+                if min_val_loss_till_now > val_loss:
+                    print(f'Improvement in val loss by {min_val_loss_till_now - val_loss}.')
+                    self.save_checkpoint(epoch_counter)
+            validation_loss.append(val_loss)
+            stop_training = self._early_stopping_crit.end_training(epoch=epoch_counter, current_loss=val_loss)
+            if stop_training:
+                self.save_onnx(fn='final_model.onnx')
+                break
+            epoch_counter += 1
             # stop by epoch number
             # train for a epoch and then calculate the loss and metrics on the validation set
             # append the losses to the respective lists
             # use the save_checkpoint function to save the model (can be restricted to epochs with improvement)
             # check whether early stopping should be performed using the early stopping criterion and stop if so
             # return the losses for both training and validation
-        return train_loss, validation_loss
+        return training_loss, validation_loss
                     
         
         
