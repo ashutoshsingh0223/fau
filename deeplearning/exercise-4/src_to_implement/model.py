@@ -25,7 +25,7 @@ class ResBlock(nn.Module):
          residual = x
          l= self.cv1(x)
          l = self.bn1(l)
-         l = self.relu(l)
+         l = self.relu1(l)
          l = self.cv2(l)
          l = self.bn2(l)
          l = self.relu2(l)
