@@ -17,7 +17,7 @@ class ResBlock(nn.Module):
         self.relu2 = nn.ReLU(inplace=True)
 
         self.residual_conv = nn.Conv2d(out_channels , 1, stride)
-        self.residual_norm = nn.BatchNorm2d(out_channels)
+        self.residual_norm = nn.BatchNorm2d(1)
 
         # self.downsample = downsample
 
@@ -30,7 +30,8 @@ class ResBlock(nn.Module):
          l = self.bn2(l)
          l = self.relu2(l)
 
-         residual = self.residual_norm(self.residual_conv(residual))
+         residual = self.residual_conv(residual)
+         residual = self.residual_norm(residual)
          l += residual
          return l
 
