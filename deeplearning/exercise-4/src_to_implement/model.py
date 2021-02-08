@@ -19,7 +19,7 @@ class ResBlock(nn.Module):
         self.residual_conv = nn.Conv2d(out_channels , 1, stride)
         self.residual_norm = nn.BatchNorm2d(out_channels)
 
-        self.downsample = downsample
+        # self.downsample = downsample
 
     def forward(self , x):
          residual = x
