@@ -18,10 +18,10 @@ class EarlyStopping():
             minimum change in monitored value to qualify as improvement.
             This number should be positive.
         patience : integer
-            number of epochs to wait for improvment before terminating.
-            the counter be reset after each improvment
+            number of epochs to wait for improvement before terminating.
+            the counter be reset after each improvement
         """
-        self.monitor = monitor
+        # self.monitor = monitor
         self.min_delta = min_delta
         self.patience = patience
         self.wait = 0

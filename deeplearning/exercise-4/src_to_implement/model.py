@@ -37,10 +37,9 @@ class ResBlock(nn.Module):
     def __call__(self, x):
         return self.forward(x)
 
-'Resnet'
 class ResNet(nn.Module):
     def __init__(self):
-        super(Resnet, self).__init__()
+        super(ResNet, self).__init__()
         self.cv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
