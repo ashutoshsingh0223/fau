@@ -12,7 +12,7 @@ class ResBlock(nn.Module):
         self.cn1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=[1, 1])
         self.bn1 = nn.BatchNorm2d(out_channels)
         self.relu1 = nn.ReLU(inplace=True)
-        self.cn2= nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=[1, 1])
+        self.cn2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=[1, 1])
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.relu2 = nn.ReLU(inplace=True)
         self.residual_conv = nn.Conv2d(in_channels, out_channels, 1, stride)
@@ -21,20 +21,15 @@ class ResBlock(nn.Module):
         # self.downsample = downsample
 
     def forward(self, x):
-       # residual = x
         res_cn = self.residual_conv(x)
         x = self.cn1(x)
         res_norm = self.residual_norm(res_cn)
         x = self.bn1(x)
-        x = F.relu(x)
+        x = self.relu1(x)
         x = self.cn2(x)
         x = self.bn2(x)
-        x = F.relu(x)
-        #residual = self.residual_conv(residual)
-        #residual = self.residual_norm(residual)
-        #l += residual
-        #return l
-        return (x + res_norm)
+        x = self.relu2(x)
+        return x + res_norm
 
     def __call__(self, x):
         return self.forward(x)
@@ -53,6 +48,7 @@ class ResNet(nn.Module):
         self.l4 = ResBlock(256, 512, 2) #resnet 512
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, 2)
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         out = self.cv1(x)
@@ -66,6 +62,6 @@ class ResNet(nn.Module):
         out = self.global_avg_pool(out)
         out = flatten(out, start_dim=1)
         out = self.fc(out)
-        out =  F.sigmoid(out)
+        out = self.sigmoid(out)
         return out
 

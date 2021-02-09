@@ -56,7 +56,7 @@ class Trainer:
         # perform following steps
         predict_y = self._model(x)
         # -calculate the loss
-        loss_val= self._crit(predict_y,y)  ## Loss function crit
+        loss_val = self._crit(predict_y, y)  ## Loss function crit
         # -compute gradient by backward propagation
         loss_val.backward()   #derivative of the loss w.r.t. the parameters  bckp
         # -update weights
@@ -86,21 +86,21 @@ class Trainer:
             if self._cuda:
                 x= x.cuda()
                 y = y.cuda()
-            x_tensor= t.tensor(x)
-            y_tensor= t.tensor(y)
+            x_tensor = t.tensor(x)
+            y_tensor = t.tensor(y)
             self._optim.zero_grad()
-            loss = self.train_step(x_tensor ,y_tensor)
+            loss = self.train_step(x_tensor, y_tensor)
             loss_for_epoch = loss_for_epoch + loss
-            print('----> Final Loss train: ', final_val)
+        print('----> Final Loss train: ', loss_for_epoch)
 
-        return loss_for_epoch / len(self._train_dl_)
+        return loss_for_epoch / len(self._train_dl)
 
     def calculate_f1score(self, true_labels, predicted_labels):
         f1 = f1_score(true_labels, predicted_labels)
         return f1
     
     def val_test(self):
-        self._model.eval() #doubt
+        self._model.eval()
         self._optim.zero_grad()
         eval_loss = 0.0
         true_labels = []
@@ -129,8 +129,7 @@ class Trainer:
         # metrics in designated functions
         # return the loss and print the calculated metrics
         return eval_loss, f1
-        
-    
+
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
         epoch_counter = 0

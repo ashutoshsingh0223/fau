@@ -18,27 +18,27 @@ class QRTest(unittest.TestCase):
             assert_allclose(np.diag(np.conjugate(W_ans.T) @ W_ans), np.ones(W_ans.shape[0]), atol=1e-15,
                             err_msg='W is not unitary')
 
-    # def test_house(self):
-    #     A = np.eye(3)
-    #     self.check_house(A)
-    #
-    #     A = np.diag([3, 2, 1])
-    #     self.check_house(A)
-    #
-    #     A = np.diag([2, 1, 3])
-    #     self.check_house(A)
-    #
-    #     A = np.array([[0, 2], [4, 0], [1, 0]])
-    #     self.check_qr(A)
-    #
-    #     A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 10]])
-    #     self.check_house(A)
-    #
-    #     A = np.array([[0, 0, 3.0], [0, 4.0, 0], [5.0, 0, 0.0]])
-    #     self.check_house(A)
-    #
-    #     A = np.array([[0, 0, 3j], [0, 4j, 0], [5j, 0, 0.0]])
-    #     self.check_house(A)
+    def test_house(self):
+        # A = np.eye(3)
+        # self.check_house(A)
+        #
+        # A = np.diag([3, 2, 1])
+        # self.check_house(A)
+        #
+        # A = np.diag([2, 1, 3])
+        # self.check_house(A)
+        #
+        # A = np.array([[0, 2], [4, 0], [1, 0]])
+        # self.check_qr(A)
+        #
+        # A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 10]])
+        # self.check_house(A)
+
+        A = np.array([[0, 0, 3.0], [0, 4.0, 0], [5.0, 0, 0.0]])
+        self.check_house(A)
+
+        A = np.array([[0, 0, 3j], [0, 4j, 0], [5j, 0, 0.0]])
+        self.check_house(A)
 
     def check_form_q(self, W):
         with self.subTest(W=W):
