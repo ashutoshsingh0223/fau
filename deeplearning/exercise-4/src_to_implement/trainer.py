@@ -56,7 +56,7 @@ class Trainer:
         # perform following steps
         predict_y = self._model(x)
         # -calculate the loss
-        loss_val = self._crit(predict_y, y)  ## Loss function crit
+        loss_val = self._crit(predict_y, t.tensor(y, dtype=t.float64))  ## Loss function crit
         # -compute gradient by backward propagation
         loss_val.backward()   #derivative of the loss w.r.t. the parameters  bckp
         # -update weights

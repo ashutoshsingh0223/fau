@@ -39,7 +39,7 @@ class ChallengeDataset(Dataset):
         if label == 1:
             label = torch.tensor([0, 1])
         else:
-            label = torch.tensor([1, 0], dtype=torch.float64)
+            label = torch.tensor([1, 0])
         return image, label
 
 
