@@ -82,14 +82,12 @@ class Trainer:
         # calculate the average loss for the epoch and return it
         self._model.train()
         loss_for_epoch = 0.0
-        for x ,y in tqdm(iter(self._train_dl)):  #batch and labels
+        for x, y in tqdm(iter(self._train_dl)):  #batch and labels
             if self._cuda:
-                x= x.cuda()
+                x = x.cuda()
                 y = y.cuda()
-            x_tensor = t.tensor(x)
-            y_tensor = t.tensor(y)
             self._optim.zero_grad()
-            loss = self.train_step(x_tensor, y_tensor)
+            loss = self.train_step(x, y)
             loss_for_epoch = loss_for_epoch + loss
         print('----> Final Loss train: ', loss_for_epoch)
 
