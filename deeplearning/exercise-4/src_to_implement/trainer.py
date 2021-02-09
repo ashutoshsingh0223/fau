@@ -48,15 +48,15 @@ class Trainer:
               do_constant_folding=True,  # whether to execute constant folding for optimization
               input_names = ['input'],   # the model's input names
               output_names = ['output'], # the model's output names
-              dynamic_axes={'input' : {0 : 'batch_size'},    # variable lenght axes
-                            'output' : {0 : 'batch_size'}})
+              dynamic_axes={'input': {0 : 'batch_size'},    # variable length axes
+                            'output': {0 : 'batch_size'}})
             
     def train_step(self, x, y):
 
         # perform following steps
         predict_y = self._model(x)
         # -calculate the loss
-        loss_val = self._crit(predict_y, t.tensor(y, dtype=t.float64))  ## Loss function crit
+        loss_val = self._crit(predict_y, y.float())  ## Loss function crit
         # -compute gradient by backward propagation
         loss_val.backward()   #derivative of the loss w.r.t. the parameters  bckp
         # -update weights
