@@ -15,13 +15,13 @@ stop_limit = 5
 # load the data from the csv file and perform a train-test-split
 # this can be accomplished using the already imported pandas and sklearn.model_selection modules
 # TODO
-data = pd.read_csv('data.csv').to_numpy()
+data = pd.read_csv('data.csv', sep=';').to_numpy()
 train_data, validation_data = train_test_split(data, shuffle=False, test_size=0.2, random_state=42)
 # set up data loading for the training and validation set each using t.utils.data.DataLoader and ChallengeDataset objects
 # TODO
-train_dataset = t.utils.data.DataLoader(train_data, batch_size=12 )
+train_dataset = t.utils.data.DataLoader(ChallengeDataset(data=pd.DataFrame(train_data), mode='train'), batch_size=12 )
 print('Loading train dataset ')
-validation_dataset = t.utils.data.DataLoader(validation_data, batch_size=12)
+validation_dataset = t.utils.data.DataLoader(ChallengeDataset(data=pd.DataFrame(validation_data), mode='train'), batch_size=12)
 print('Loading validation dataset')
 # create an instance of our ResNet model
 # TODO
