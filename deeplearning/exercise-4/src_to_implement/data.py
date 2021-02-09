@@ -21,7 +21,6 @@ class ChallengeDataset(Dataset):
         self.data = data
         self.mode = mode
 
-
     def __len__(self):
         return len(self.data)
 
