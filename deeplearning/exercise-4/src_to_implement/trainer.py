@@ -48,7 +48,7 @@ class Trainer:
               do_constant_folding=True,  # whether to execute constant folding for optimization
               input_names = ['input'],   # the model's input names
               output_names = ['output'], # the model's output names
-              dynamic_axes={'input': {0 : 'batch_size'},    # variable length axes
+              dynamic_axes={'input': {0: 'batch_size'},    # variable length axes
                             'output': {0 : 'batch_size'}})
             
     def train_step(self, x, y):
@@ -103,7 +103,7 @@ class Trainer:
         eval_loss = 0.0
         true_labels = []
         predicted_labels = []
-        for x, y in tqdm(iter(self._val_test_dl)):
+        for x, y in tqdm.tqdm(iter(self._val_test_dl)):
             max, indices = t.max(y, 0)
             true_labels.append(indices)
             if self._cuda:
