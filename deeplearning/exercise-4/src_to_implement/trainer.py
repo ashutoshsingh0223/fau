@@ -104,16 +104,13 @@ class Trainer:
         true_labels = []
         predicted_labels = []
         for x, y in tqdm.tqdm(iter(self._val_test_dl)):
-            max, indices = t.max(y, 0)
-            true_labels.append(indices)
+            true_labels.append(t.argmax(y).item())
             if self._cuda:
                 x = x.cuda()
                 y = y.cuda()
-            x_tensor = t.tensor(x)
-            y_tensor = t.tensor(y)
-            loss, y_predicted = self.val_test_step(x_tensor,y_tensor)
-            p_max, p_indices = t.max(y, 0)
-            predicted_labels.append(p_indices)
+
+            loss, y_predicted = self.val_test_step(x, y)
+            predicted_labels.append(t.argmax(y_predicted).item())
             eval_loss = eval_loss + loss
         eval_loss = eval_loss / len(self._val_test_dl)
         f1 = self.calculate_f1score(true_labels=true_labels, predicted_labels=predicted_labels)
