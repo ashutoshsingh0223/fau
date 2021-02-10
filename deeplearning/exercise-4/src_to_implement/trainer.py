@@ -1,5 +1,5 @@
 import torch as t
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 import tqdm
 
 
@@ -91,9 +91,11 @@ class Trainer:
             self._optim.zero_grad()
             loss = self.train_step(x, y)
             loss_for_epoch = loss_for_epoch + loss
-        print('----> Final Loss train: ', loss_for_epoch)
-
         return loss_for_epoch / len(self._train_dl)
+
+    def calculate_accuracy(self, true_labels, predicted_labels):
+        accuracy = accuracy_score(true_labels, predicted_labels)
+        return accuracy
 
     def calculate_f1score(self, true_labels, predicted_labels):
         f1 = f1_score(true_labels, predicted_labels)
@@ -116,6 +118,7 @@ class Trainer:
             eval_loss = eval_loss + loss
         eval_loss = eval_loss / len(self._val_test_dl)
         f1 = self.calculate_f1score(true_labels=true_labels, predicted_labels=predicted_labels)
+        accuracy = self.calculate_accuracy(true_labels=true_labels, predicted_labels=predicted_labels)
         # set eval mode
         # disable gradient computation
         # iterate through the validation set
@@ -125,28 +128,37 @@ class Trainer:
         # calculate the average loss and average metrics of your choice. You might want to calculate these
         # metrics in designated functions
         # return the loss and print the calculated metrics
-        return eval_loss, f1
+        return eval_loss, f1, accuracy
 
     def fit(self, epochs=-1):
         assert self._early_stopping_patience > 0 or epochs > 0
         epoch_counter = 0
         validation_loss = []
         training_loss = []
+        stop_training = False
         while epoch_counter < epochs:
             train_loss = self.train_epoch()
+            print(f'Average training loss for epoch {epoch_counter} is {train_loss}')
             training_loss.append(train_loss)
-            val_loss, f1 = self.val_test()
+            val_loss, f1, accuracy_score = self.val_test()
+            print(f'Average validation loss for epoch {epoch_counter} is {val_loss}. F1-score={f1}. Accuracy={accuracy}')
             if validation_loss:
                 min_val_loss_till_now = min(validation_loss)
                 if min_val_loss_till_now > val_loss:
-                    print(f'Improvement in val loss by {min_val_loss_till_now - val_loss}.')
+                    print(f'Saving checkpoint. Improvement in val loss by {min_val_loss_till_now - val_loss}.')
                     self.save_checkpoint(epoch_counter)
             validation_loss.append(val_loss)
             stop_training = self._early_stopping_crit.end_training(epoch=epoch_counter, current_loss=val_loss)
+
             if stop_training:
+                print(f'Early stopping triggered. Saving final model')
                 self.save_onnx(fn='final_model.onnx')
                 break
             epoch_counter += 1
+
+        if not stop_training:
+            print(f'Saving final model')
+            self.save_onnx(fn='final_model.onnx')
             # stop by epoch number
             # train for a epoch and then calculate the loss and metrics on the validation set
             # append the losses to the respective lists
@@ -154,7 +166,3 @@ class Trainer:
             # check whether early stopping should be performed using the early stopping criterion and stop if so
             # return the losses for both training and validation
         return training_loss, validation_loss
-                    
-        
-        
-        
