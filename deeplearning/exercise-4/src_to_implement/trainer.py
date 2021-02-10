@@ -29,6 +29,8 @@ class Trainer:
             self._crit = crit.cuda()
             
     def save_checkpoint(self, epoch):
+        if not os.path.exists('checkpoints'):
+            os.mkdir('checkpoints')
         t.save({'state_dict': self._model.state_dict()}, 'checkpoints/checkpoint_{:03d}.ckp'.format(epoch))
     
     def restore_checkpoint(self, epoch_n):
@@ -104,13 +106,13 @@ class Trainer:
         true_labels = []
         predicted_labels = []
         for x, y in tqdm.tqdm(iter(self._val_test_dl)):
-            true_labels.append(t.argmax(y).item())
+            true_labels.extend(t.argmax(y, dim=1).cpu().numpy().tolist())
             if self._cuda:
                 x = x.cuda()
                 y = y.cuda()
 
             loss, y_predicted = self.val_test_step(x, y)
-            predicted_labels.append(t.argmax(y_predicted).item())
+            predicted_labels.extend(t.argmax(y_predicted, dim=1).cpu().numpy().tolist())
             eval_loss = eval_loss + loss
         eval_loss = eval_loss / len(self._val_test_dl)
         f1 = self.calculate_f1score(true_labels=true_labels, predicted_labels=predicted_labels)
@@ -130,7 +132,7 @@ class Trainer:
         epoch_counter = 0
         validation_loss = []
         training_loss = []
-        while True:
+        while epoch_counter < epochs:
             train_loss = self.train_epoch()
             training_loss.append(train_loss)
             val_loss, f1 = self.val_test()
