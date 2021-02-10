@@ -140,7 +140,7 @@ class Trainer:
             train_loss = self.train_epoch()
             print(f'Average training loss for epoch {epoch_counter} is {train_loss}')
             training_loss.append(train_loss)
-            val_loss, f1, accuracy_score = self.val_test()
+            val_loss, f1, accuracy = self.val_test()
             print(f'Average validation loss for epoch {epoch_counter} is {val_loss}. F1-score={f1}. Accuracy={accuracy}')
             if validation_loss:
                 min_val_loss_till_now = min(validation_loss)
