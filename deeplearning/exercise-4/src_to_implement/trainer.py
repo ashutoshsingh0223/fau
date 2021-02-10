@@ -69,7 +69,7 @@ class Trainer:
         # predict
         predict_y = self._model(x)
         # propagate through the network and calculate the loss and predictions
-        loss_val = self._crit(predict_y, y)
+        loss_val = self._crit(predict_y, y.float())
         self._model.eval()
         # return the loss and the predictions
         return float(loss_val), predict_y
