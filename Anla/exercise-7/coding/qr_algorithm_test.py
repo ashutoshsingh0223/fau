@@ -58,7 +58,7 @@ class QRTest(unittest.TestCase):
             eig_vals = np.linalg.eigvals(A)
             for eig in eig_vals:
                 self.assertLess(np.abs(sol - eig).min(), 1e-14,
-                                msg=f'eigenvalue {eig} nof found')
+                                msg=f'eigenvalue {eig} not found')
             for eig in sol:
                 self.assertLess(np.abs(eig_vals - eig).min(), 1e-14,
                                 msg=f'{eig} is not an eigenvalue')
