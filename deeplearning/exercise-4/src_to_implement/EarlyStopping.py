@@ -42,3 +42,28 @@ class EarlyStopping():
                     self.stopped_epoch = epoch + 1
                     return True
                 self.wait += 1
+
+
+class EarlyStoppingCallback:
+
+    def __init__(self, patience):
+        #initialize all members you need
+        self.patience = patience
+        self.counter = 0
+        self.prevBest = 1000
+
+    def step(self, current_loss):
+        # check whether the current loss is lower than the previous best value.
+        # if not count up for how long there was no progress
+        if current_loss < self.prevBest:
+            self.prevBest = current_loss
+            self.counter = 0
+        else:
+            self.counter += 1
+
+    def should_stop(self):
+        # check whether the duration of where there was no progress is larger or equal to the patience
+        if self.counter > self.patience:
+            return True
+        else:
+            return False

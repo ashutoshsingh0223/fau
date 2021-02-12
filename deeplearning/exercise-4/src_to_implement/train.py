@@ -2,7 +2,7 @@ import torch as t
 from torch import nn
 from src_to_implement.data import ChallengeDataset
 from src_to_implement.trainer import Trainer
-from src_to_implement.EarlyStopping import EarlyStopping
+from src_to_implement.EarlyStopping import EarlyStopping, EarlyStoppingCallback
 
 from matplotlib import pyplot as plt
 import numpy as np
