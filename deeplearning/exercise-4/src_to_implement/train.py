@@ -9,6 +9,7 @@ import numpy as np
 from src_to_implement.model import ResNet
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 epochs = 50
 stop_limit = 5
@@ -34,12 +35,18 @@ print('Loading Resnet model')
 criterion_loss = nn.BCELoss()
 optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
 
+# Reduce LR when validation loss stops decreasing
+
+
 patience = 5
 early_stopping = EarlyStopping(patience=patience)
 
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, verbose=True)
+
 trainer = Trainer(model=model, crit=criterion_loss, optim=optimizer,
                   train_dl=train_dataset, val_test_dl=validation_dataset,
-                  cuda=True, early_stopping_patience=early_stopping.patience, early_stopping_crit=early_stopping)
+                  cuda=True, early_stopping_patience=early_stopping.patience, early_stopping_crit=early_stopping,
+                  scheduler=scheduler)
 
 # go, go, go... call fit on trainer
 res = trainer.fit(epochs=epochs)

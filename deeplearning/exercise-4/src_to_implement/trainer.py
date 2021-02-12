@@ -14,7 +14,8 @@ class Trainer:
                  val_test_dl=None,             # Validation (or test) data set
                  cuda=True,                    # Whether to use the GPU
                  early_stopping_patience=-1,
-                 early_stopping_crit=None):  # The patience for early stopping
+                 early_stopping_crit=None,
+                 scheduler=None):  # The patience for early stopping
         self._model = model
         self._crit = crit
         self._optim = optim
@@ -24,6 +25,7 @@ class Trainer:
 
         self._early_stopping_patience = early_stopping_patience
         self._early_stopping_crit = early_stopping_crit
+        self.scheduler = scheduler
 
         if cuda:
             self._model = model.cuda()
@@ -143,6 +145,7 @@ class Trainer:
             training_loss.append(train_loss)
             val_loss, f1, accuracy = self.val_test()
             print(f'Average validation loss for epoch {epoch_counter} is {val_loss}. F1-score={f1}. Accuracy={accuracy}')
+            self.scheduler.step(val_loss)
             if validation_loss:
                 min_val_loss_till_now = min(validation_loss)
                 if min_val_loss_till_now > val_loss:
