@@ -147,7 +147,7 @@ class Trainer:
             print(f'Average validation loss for epoch {epoch_counter} is {val_loss}. F1-score={f1}. Accuracy={accuracy}')
             self.scheduler.step(val_loss)
             if validation_loss:
-                min_val_loss_till_now = min(validation_loss)
+                min_val_loss_till_now = validation_loss[-1]
                 if min_val_loss_till_now > val_loss:
                     print(f'Saving checkpoint. Improvement in val loss by {min_val_loss_till_now - val_loss}.')
                     self.save_checkpoint(epoch_counter)
