@@ -1,82 +1,68 @@
-# import torch.nn.Module
-import torch
+import torch.nn as nn
+import numpy as np
+from torch.nn import functional as F
+from torch import flatten
 
-class resnet(torch.nn.Module):
+class ResBlock(nn.Module):
+    def __init__(self ,in_channels, out_channels , stride):
+        super(ResBlock,self).__init__()
+        # nn.Conv2d(in_channels, out_channels, filter_size=3, stride)
+        self.out_channels = out_channels
+        self.stride = stride
+        self.cn1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=[1, 1])
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.relu1 = nn.ReLU(inplace=True)
+        self.cn2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=[1, 1])
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.relu2 = nn.ReLU(inplace=True)
+        self.residual_conv = nn.Conv2d(in_channels, out_channels, 1, stride)
+        self.residual_norm = nn.BatchNorm2d(out_channels)
+
+        # self.downsample = downsample
+
+    def forward(self, x):
+        res_cn = self.residual_conv(x)
+        x = self.cn1(x)
+        res_norm = self.residual_norm(res_cn)
+        x = self.bn1(x)
+        x = self.relu1(x)
+        x = self.cn2(x)
+        x = self.bn2(x)
+        x = self.relu2(x)
+        return x + res_norm
+
+    def __call__(self, x):
+        return self.forward(x)
+
+
+class ResNet(nn.Module):
     def __init__(self):
-        super().__init__()
-        self.Conv = torch.nn.Conv2d(3, 64, 7, 2)
-        self.BatchNorm = torch.nn.BatchNorm2d(64)
-        self.ReLU = torch.nn.ReLU()
-        self.MaxPool = torch.nn.MaxPool2d(3, 2)
-        # self.ResBlock1 = torch.nn.Sequential(torch.nn.Conv2d(64, 64, 3, 1),
-        #                                      torch.nn.BatchNorm2d(64),
-        #                                      torch.nn.ReLU())
-        #
-        # self.ResBlock2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, 3, 2),
-        #                                      torch.nn.BatchNorm2d(128),
-        #                                      torch.nn.ReLU())
-        #
-        # self.ResBlock3 = torch.nn.Sequential(torch.nn.Conv2d(128, 256, 3, 2),
-        #                                      torch.nn.BatchNorm2d(256),
-        #                                      torch.nn.ReLU())
-        #
-        # self.ResBlock4 = torch.nn.Sequential(torch.nn.Conv2d(256, 512, 3, 2),
-        #                                      torch.nn.BatchNorm2d(512),
-        #                                      torch.nn.ReLU())
+        super(ResNet, self).__init__()
+        self.cv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.mp = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.l1 = ResBlock(64, 64, 1) #resnet 64
+        self.l2 = ResBlock(64, 128, 2) #resnet 128
+        self.l3 = ResBlock(128, 256, 2) #resnet 256
+        self.l4 = ResBlock(256, 512, 2) #resnet 512
+        self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(512, 2)
+        self.flatten = nn.Flatten()
+        self.sigmoid = nn.Sigmoid()
 
-        self.ResBlock1 = torch.nn.Sequential(torch.nn.Conv2d(64, 64, 3, 1, padding=2),
-                                             torch.nn.BatchNorm2d(64),
-                                             torch.nn.ReLU(),
-                                             torch.nn.Conv2d(64, 64, 3),
-                                             torch.nn.BatchNorm2d(64),
-                                             torch.nn.ReLU())
-        self.res_conv1 = torch.nn.Sequential(torch.nn.Conv2d(64, 64, 1),
-                                             torch.nn.BatchNorm2d(64))
+    def forward(self, x):
+        out = self.cv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        out = self.mp(out)
+        out = self.l1(out)
+        out = self.l2(out)
+        out = self.l3(out)
+        out = self.l4(out)
+        out = self.global_avg_pool(out)
+        out = self.flatten(out)
+        out = self.fc(out)
+        out = self.sigmoid(out)
+        return out
 
-        self.ResBlock2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, 3, 2, padding=3),
-                                             torch.nn.BatchNorm2d(128),
-                                             torch.nn.ReLU(),
-                                             torch.nn.Conv2d(128, 128, 3),
-                                             torch.nn.BatchNorm2d(128),
-                                             torch.nn.ReLU())
-        self.res_conv2 = torch.nn.Sequential(torch.nn.Conv2d(64, 128, 1, 2),
-                                             torch.nn.BatchNorm2d(128))
-
-        self.ResBlock3 = torch.nn.Sequential(torch.nn.Conv2d(128, 256, 3, 2, padding=3),
-                                             torch.nn.BatchNorm2d(256),
-                                             torch.nn.ReLU(),
-                                             torch.nn.Conv2d(256, 256, 3),
-                                             torch.nn.BatchNorm2d(256),
-                                             torch.nn.ReLU())
-        self.res_conv3 = torch.nn.Sequential(torch.nn.Conv2d(128, 256, 1, 2),
-                                             torch.nn.BatchNorm2d(256))
-
-        self.ResBlock4 = torch.nn.Sequential(torch.nn.Conv2d(256, 512, 3, 2, padding=3),
-                                             torch.nn.BatchNorm2d(512),
-                                             torch.nn.ReLU(),
-                                             torch.nn.Conv2d(512, 512, 3),
-                                             torch.nn.BatchNorm2d(512),
-                                             torch.nn.ReLU())
-        self.res_conv4 = torch.nn.Sequential(torch.nn.Conv2d(256, 512, 1, 2),
-                                             torch.nn.BatchNorm2d(512))
-
-        self.GlobalAvgPool = torch.nn.AdaptiveAvgPool2d((1, 1))  # ?
-        self.Flatten = torch.nn.Flatten()
-        self.FC = torch.nn.Linear(512, 2)
-
-    def forward(self, input_tensor):
-        input_tensor = self.Conv(input_tensor)
-        input_tensor = self.BatchNorm(input_tensor)
-        input_tensor = self.ReLU(input_tensor)
-        input_tensor = self.MaxPool(input_tensor)
-
-        input_tensor = self.ResBlock1(input_tensor) + self.res_conv1(input_tensor)
-        input_tensor = self.ResBlock2(input_tensor) + self.res_conv2(input_tensor)
-        input_tensor = self.ResBlock3(input_tensor) + self.res_conv3(input_tensor)
-        input_tensor = self.ResBlock4(input_tensor) + self.res_conv4(input_tensor)
-
-        input_tensor = self.GlobalAvgPool(input_tensor)
-        input_tensor = self.Flatten(input_tensor)
-        input_tensor = self.FC(input_tensor)
-
-        return input_tensor

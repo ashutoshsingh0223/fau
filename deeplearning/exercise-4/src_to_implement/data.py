@@ -38,17 +38,14 @@ class ChallengeDataset(Dataset):
             index = index.tolist()
 
         img_name = self.data.iloc[index, 0]
-        label = self.data.iloc[index, 1]
+        label = [self.data.iloc[index, 1], self.data.iloc[index, 2]]
         image = imread(img_name)
         image = gray2rgb(image)
 
         if self._transform:
             image = self._transform(image)
 
-        if label == 1:
-            label = torch.tensor([0, 1])
-        else:
-            label = torch.tensor([1, 0])
+        label = torch.tensor(label)
         return image, label
 
 

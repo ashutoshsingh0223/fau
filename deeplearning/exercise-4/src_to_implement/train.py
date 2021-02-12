@@ -2,7 +2,7 @@ import torch as t
 from torch import nn
 from src_to_implement.data import ChallengeDataset
 from src_to_implement.trainer import Trainer
-from src_to_implement.EarlyStopping import EarlyStopping, EarlyStoppingCallback
+from src_to_implement.EarlyStopping import EarlyStopping
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -41,7 +41,7 @@ optimizer = t.optim.Adam(model.parameters(), lr=0.0001)
 patience = 5
 early_stopping = EarlyStopping(patience=patience)
 
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=2, verbose=True)
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 
 trainer = Trainer(model=model, crit=criterion_loss, optim=optimizer,
                   train_dl=train_dataset, val_test_dl=validation_dataset,
