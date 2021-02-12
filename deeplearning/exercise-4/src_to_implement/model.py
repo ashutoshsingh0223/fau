@@ -48,6 +48,7 @@ class ResNet(nn.Module):
         self.l4 = ResBlock(256, 512, 2) #resnet 512
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, 2)
+        self.flatten = nn.Flatten()
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -60,7 +61,7 @@ class ResNet(nn.Module):
         out = self.l3(out)
         out = self.l4(out)
         out = self.global_avg_pool(out)
-        out = flatten(out, start_dim=1)
+        out = self.flatten(out)
         out = self.fc(out)
         out = self.sigmoid(out)
         return out

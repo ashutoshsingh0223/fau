@@ -13,11 +13,20 @@ train_std = [0.16043035, 0.16043035, 0.16043035]
 
 class ChallengeDataset(Dataset):
     def __init__(self, data: pandas.DataFrame, mode: str):
-        self._transform: tv.transforms.Compose = tv.transforms.Compose([
-            tv.transforms.ToPILImage(),
-            tv.transforms.ToTensor(),
-            tv.transforms.Normalize(mean=train_mean, std=train_std)
-        ])
+
+        if mode == 'train':
+            self._transform: tv.transforms.Compose = tv.transforms.Compose([
+                tv.transforms.ToPILImage(),
+                tv.transforms.RandomHorizontalFlip(),
+                tv.transforms.ToTensor(),
+                tv.transforms.Normalize(mean=train_mean, std=train_std)
+            ])
+        else:
+            self._transform: tv.transforms.Compose = tv.transforms.Compose([
+                tv.transforms.ToPILImage(),
+                tv.transforms.ToTensor(),
+                tv.transforms.Normalize(mean=train_mean, std=train_std)
+            ])
         self.data = data
         self.mode = mode
 

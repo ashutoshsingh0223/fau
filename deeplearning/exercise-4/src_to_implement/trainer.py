@@ -115,8 +115,8 @@ class Trainer:
             if self._cuda:
                 x = x.cuda()
                 y = y.cuda()
-
-            loss, y_predicted = self.val_test_step(x, y)
+            with t.no_grad():
+                loss, y_predicted = self.val_test_step(x, y)
             predicted_labels.extend(t.argmax(y_predicted, dim=1).cpu().numpy().tolist())
             eval_loss = eval_loss + loss
         eval_loss = eval_loss / len(self._val_test_dl)

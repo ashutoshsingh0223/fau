@@ -31,7 +31,7 @@ class EarlyStopping():
 
     def end_training(self, epoch, current_loss):
         if current_loss is None:
-            pass
+            return False
         else:
             if (current_loss - self.best_loss) < -self.min_delta:
                 self.best_loss = current_loss
