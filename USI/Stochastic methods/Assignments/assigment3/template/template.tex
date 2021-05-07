@@ -1,0 +1,153 @@
+\documentclass[unicode,11pt,a4paper,oneside,numbers=endperiod,openany]{scrartcl}
+
+\usepackage{assignment}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage{algorithm,algorithmic}
+\hyphenation{PageRank}
+\hyphenation{PageRanks}
+
+\newtheorem{theorem}{Theorem}
+\renewcommand\thesubsection{\arabic{subsection}}
+\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+\DeclareOldFontCommand{\it}{\normalfont\bfseries}{\mathit}
+% \DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+
+
+\allowdisplaybreaks
+
+\begin{document}
+
+\setassignment
+\setduedate{Tuesday, April 27, 2021, 11.59pm}
+\serieheader{Stochastic Methods}{Academic Year 2020/2021}{Prof. Dr. Illia Horenko (illia.horenko@usi.ch)}{Edoardo Vecchi (edoardo.vecchi@usi.ch)}{Assignment 3 - Solution}{[Ashutosh Singh]}
+
+%-----------------------------------------------------------------------------------------------
+
+\section*{Exercise 1: Unconstrained Optimization of a Quadratic Problem}
+
+{Solution}
+
+${f(x) = x^THx + c^Tx}$
+
+${f'(x) = 2Hx + c}$
+
+{For extrema of the function. Set first derivative equal to zero}
+
+${f'(x) = 0}$
+
+${2Hx + c = 0}$
+
+\Rightarrow {x = \frac{-(H^{-1}c)}{2}}
+
+\section*{Exercise 2: Constrained Optimization with Parametrization}
+{Solution}
+
+
+
+{\max_{x_1, x_2} f(x_1,x_2) = 5 − {{x_1}^{2}} -  { \frac{1}{2} {x_2}^{2}}}
+
+{s.t. x_1+x_2=2}\\~\\
+
+{Converting it to minimization problem by setting g(x) = -f(x)}
+
+{\min_{x_1, x_2} g(x_1,x_2) = - 5 + {{x_1}^{2}} + { \frac{1}{2} {x_2}^{2}}}
+
+{s.t. x_1+x_2=2}\\~\\
+
+{Now for parametrization, Put $x_1 = t$}
+
+\Rightarrow{ x_2 = 2 - t}
+
+\Rightarrow{ g(x_1,x_2) = h(t) = - 5 + t^2 + \frac{(t - 2)^2}{2}}
+
+\Rightarrow{ h(t) = - 3 + \frac{3{t^2}}{2} - 2t}\\~\\
+
+{Now our minimization problem becomes}
+
+{\min_{t} h(t) = - 3 + \frac{3{t^2}}{2} - 2t}
+
+\Rightarrow{h'(t) = 3t - 2 = 0}
+
+\Rightarrow{t = \frac{2}{3}}
+
+\Rightarrow{x_1 = \frac{2}{3}}
+
+\Rightarrow{x_2 = 2 - \frac{2}{3} = 4/3}
+
+
+
+
+\section*{Exercise 3: Optimization on the Unit Circle}
+\begin{enumerate}
+	\item [(a)] 
+	
+	All norm balls are in the figure.
+	\item [(b)] 
+	
+	Solution
+	
+	{$f(x_1,x_2) = x_1x_2$}
+	
+	{For 1-norm unit ball constraint in first quadrant}
+	
+	{\min_{x_1, x_2} f(x_1,x_2) }
+
+    {s.t. |x_1|+ |x_2| = 1}\\~\\
+    
+    {Writing in Lagrange form}
+    
+    {$L(x_1, x_2, \lambda) = x_1x_2 + λ(|x_1|+ |x_2| - 1)$}
+    
+    {\nabla L(x_1, x_2, \lambda) = \left[\begin{array}{c}
+\dfrac{\partial f}{\partial x_1}(\left.x_{1}, x_{2}, \lambda \right)\\
+\dfrac{\partial f}{\partial x_2}(\left.x_{1}, x_{2}, \lambda \right) \\
+\dfrac{\partial f}{\partial \lambda}(\left.x_{1}, x_{2}, \lambda }\right)
+\end{array}\right]}
+
+    {\nabla L(x_1, x_2, \lambda) = \left[\begin{array}{c}
+x_2 + \lambda\\
+x_1 + \lambda\\
+x_1 + x_2 - 1
+\end{array}\right]}
+
+    \Rightarrow{ \lambda = -\dfrac{1}{2}}, 
+               { x_1 = \dfrac{1}{2}}, 
+               { x_2 = \dfrac{1}{2}}
+
+
+	
+	
+	\item [(c)]
+	
+	Solution
+\end{enumerate}
+
+%-----------------------------------------------------------------------------------------------
+
+\section*{Exercise 4: Lagrange Multipliers and Bordered Hessian}
+\begin{enumerate}
+	\item [(a)] 
+	\item [(b)] 
+	\item [(c)] 
+\end{enumerate}
+
+%-----------------------------------------------------------------------------------------------
+
+\section*{Exercise 5: An Application to Economics}
+\begin{itemize}
+	\item [(a)] 
+	\item [(b)] 
+	\item [(c)]
+\end{itemize}
+
+%-----------------------------------------------------------------------------------------------
+
+\section*{Exercise 6: Maximisation Using the KKT Conditions}
+
+%-----------------------------------------------------------------------------------------------
+
+
+
+\end{document}

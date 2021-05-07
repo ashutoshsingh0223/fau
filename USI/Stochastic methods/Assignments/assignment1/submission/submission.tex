@@ -1,0 +1,177 @@
+\documentclass[unicode,11pt,a4paper,oneside,numbers=endperiod,openany]{scrartcl}
+\usepackage{assignment}
+\usepackage{textcomp}
+\usepackage{amsmath}
+\usepackage{theorem}
+\usepackage{algorithm,algorithmic}
+\hyphenation{PageRank}
+\hyphenation{PageRanks}
+
+\newtheorem{theorem}{Theorem}
+\renewcommand\thesubsection{\arabic{subsection}}
+\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+\DeclareOldFontCommand{\it}{\normalfont\bfseries}{\mathit}
+
+
+\allowdisplaybreaks
+
+\begin{document}
+
+\setassignment
+\setduedate{Tuesday, March 16, 2021, 11.59pm}
+\serieheader{Stochastic Methods}{Academic Year 2020/2021}{Prof. Dr. Illia Horenko (illia.horenko@usi.ch)}{Edoardo Vecchi (edoardo.vecchi@usi.ch)}{Assignment 1 - Solution}{[Please insert your name]}
+
+\section*{Exercise 1: Mean, Covariance and Correlation in Matlab}
+\begin{enumerate}
+	\item[(a)] 
+	Elapsed time is 4.418048 seconds.
+	
+	Elapsed time is 0.022190 seconds.
+	\item[(b)] 
+	
+	Figure inside folder figures in the submission.
+\end{enumerate}
+
+\section*{Exercise 2: Application of the Central Limit Theorem}
+\begin{enumerate}
+	\item[(a)] {Let $S_n$ be the number of heads in 800 tosses.}
+	
+	S$_$n is the sum of 800 random variables $X_i$ with head in i-th toss
+	
+	
+	{E[$X_i$] = 1/2; Var[$X_i$] = 1/4.}
+	
+	{Then by central limit theorem-}
+	
+	P($S_n$ > 415) = P($\sum_{i=1}^{800} $X_i$ > 415)
+	
+	\Rightarrow 1 - P(0 <= $\sum_{i=1}^{800} $X_i$ <= 415)
+	
+\Rightarrow 1 - P((0 - 800*E[$X_i$])/\sqrt{(Var[$X_i$]*800) <= $\sum_{i=1}^{800} { {X_i - 800*E[$X_i$]}/\sqrt{(Var[$X_i$]*800)} } <= { {415 - 800*E[$X_i$]}/\sqrt{(Var[$X_i$]*800)} })
+	
+\Rightarrow 1 - P(-400/\sqrt{200} <=  $Z_n$ <= { 15/\sqrt{200} })
+	
+	
+	\item[(b)]
+	P(230 <= $S_n$ <= 255) = P({{(230 - 800*E[$X_i$])}/\sqrt{(Var[$X_i$]*800)}} <= $Z_n$ <= 255 - 800*E[$X_i$]}/\sqrt{Var[$X_i$]*800}})
+	
+	\Rightarrow P({{230 - 400}/\sqrt{200}} <= $Z_n$ <= 255 - 400}/\sqrt{200}})
+	
+	\Rightarrow P({-170/\sqrt{200}} <= $Z_n$ <= -145/\sqrt{200}})
+	
+	\Rightarrow P({-12.02} <= Z$_$n <= {-10.25}})
+	
+	\Rightarrow \phi(-10.25) - \phi(-12.02)
+\end{enumerate}
+
+\section*{Exercise 3: Law of the Total Probability}
+      
+    {P(left at home) = {1/4}}; 
+    {P(left at library) = {1/2}}; 
+    {P(left at train) = {1/4}}; 
+\begin{enumerate}
+	
+	\item[(a)]
+	P(found in library) = {1/2} * {.9} = {0.45}
+	
+	P(found in train) = {1/4} * {.5} = {0.125}
+	\item[(b)] 
+	P(left at home) = {1/4}
+	\item[(c)]
+    P(not found) = P(not found | left at home)P(left at home) + P(not found | left at lib)P(left at lib) + P(not found | left at train)P(left at train)
+    
+	$\Rightarrow$ P(not found) = P(chances to not find in home)P(left at home) + P(chances to not find in lib)P(left at lib) + P(chances to not find in train)P(left at train)
+	
+	$\Rightarrow$ P(not found) = P(chances to not find in home){1/2} + {1-0.9}*{1/2} + {1 - 0.5}*{1/4}
+	
+	$\Rightarrow$ P(not found) = P(chances to not find in home){1/2} + 0.05 + 0.125
+	
+	$\Rightarrow$ P(not found) = {1 - P(chances find in home)}{1/2} + 0.05 + 0.125
+	
+	$\Rightarrow$ P(not found) = {1 - P(chances find in home)}{1/2} + 0.05 + 0.125
+	
+    $\Rightarrow$ P(not found) = {1 - (1 - {{1/3} * P(chances to find in lib)} - {{1/3} * P(chances to find in train)})}{1/2} + 0.05 + 0.125
+    
+	$\Rightarrow$ P(not found) = {1 - (1 - {{1/3} * 0.9} - {{1/3} * 0.5})}{1/2} + 0.05 + 0.125
+	
+	$\Rightarrow$ P(not found) = {1 - (1 - 0.13)}{1/2} + 0.05 + 0.125
+	
+	$\Rightarrow$ P(not found) = 0.067 + 0.05 + 0.125
+	
+	$\Rightarrow$ P(not found) = 0.242
+
+	
+\end{enumerate}
+
+\section*{Exercise 4: Bayes' Theorem}
+\begin{enumerate}
+	\item[(a)]
+	{P(infected) = 0.005}
+	
+	{P(positive test|infected) = 0.99}
+	
+	{P(positive test|not infected) = 0.02}
+	
+	{P(infected|positive test)} = {P(positive test|infected)} * {P(infected)}
+	
+    $\Rightarrow$ {P(infected|positive test)} = 0.99 * 0.005 = 00495
+    
+	\item[(b)]
+	{P(no symptoms|V1)} = 0.95
+	
+	{P(V1)} = 0.84
+	
+    {P(V1|symptoms)} = {P(symptoms|V1)} * {P(V1)}
+    
+	$\Rightarrow$ {P(V1|symptoms)} = {1 - P(no symptoms|V1)} * {P(V1)}
+	
+	$\Rightarrow$ {P(V1|symptoms)} = 0.05 * 0.84 = 0.042
+
+	 
+\end{enumerate}
+
+\section*{Exercise 5: Fixed-Point Iteration}
+\begin{enumerate}
+\item[(a)]
+ \[ f(x) = e^{-x} - 0.5x \]
+ Choosing $\phi(x)$ such that:
+ \[ \phi(x) = 2\lambda e^{-x}  \in [0, 1] \]
+ 
+ \Rightarrow  $0 < \lambda <= 0.5 $
+ 
+ Now the following iteration:
+ 
+ $x_{n+1} = \phi(x_n)$
+ 
+ will bring us to the approximate solution.
+ 
+\item[(b)]
+\end{enumerate}
+
+\[ ||x^* - x_n|| <= q^n/(1-q)||x_1 - x_0|| \]   (1)
+
+Let $\lambda = 0.5$
+
+$x_1 = \phi(x_0) = 2*0.5*e^(-0.2) = 0.81$
+
+
+ $||\phi(x_1) - \phi(x_0)|| <= q||x_1 - x_0||$
+ 
+ \Rightarrow $0.37 <= q*0.61$
+ 
+ \Rightarrow $0.37/0.61 <= q$
+ 
+ \Rightarrow $0.606 <= q$
+
+from (1):
+$||0.015|| <= q^n/(1-q)||0.81 - 0.2|| $
+
+\Rightarrow $0.015 * 0.394 / 0.61 = q^n$
+
+\Rightarrow $n \simeq 9.25$
+
+
+  
+
+
+\end{document}
