@@ -1,8 +1,13 @@
 # Reading the datafile
+set.seed(12345)
 raw.data <- read.csv('~/Downloads/results-20210426-141638.csv')
 
 dim(raw.data)
 head(raw.data)
+
+######## Data Augmentation ##############
+
+##### Augmentation Step 1: Finding what's missing $$$$$
 
 # Getting a sequence of events to get a Markov Chain.
 # I am planning on using the stationary distribution if it exists to fill blank values in user vectors like:
@@ -54,3 +59,50 @@ period(McEvent) # Period = 1 implying chain is aperiodic
 
 
 # Since Markov chain is irreducible and aperiodic a unique limiting distribution exists
+limiting.dist <- steadyStates(McEvent)
+limiting.dist <- as.data.frame(limiting.dist)
+limiting.dist$login
+
+##### Augmentation Step 2: Adding a time dependency
+# Accounting for: How frequent are user's visits
+# In the series of events there are different time intervals for different users(Scale is not uniform)
+
+
+
+####### Generating vectors for users #########
+
+### Ignoring Time ###
+
+### Here I am only considering scores from transition matrix.
+### Scoring scheme:
+#  1. For the first event user gets a score of 1
+#  2. For the second event users gets a score of McEvent[first event, second event]
+#  3. If there is no transition score user gets a value from stationary distribution
+#  4. Not considering time. I ignore the time between events completely.
+
+# Empty user matrix
+user_matrix <- matrix(0, byrow=TRUE,nrow=length(users),ncol=length(events), dimnames=list(users, events))
+user_matrix
+
+for (user in users){
+    user_events <- raw.data[raw.data$user_id == user, ]$event_name
+    for (index in 1: length(user_events)){
+      if(index == 1){
+        user_matrix[user, user_events[index]] = 1
+      }
+      else{
+        transition_score <- transition_matrix[user_events[index - 1], user_events[index]]
+        if(transition_score > 0){
+          user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]] + transition_matrix[user_events[index - 1], user_events[index]]
+        }
+        else{
+          user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]]+ limiting.dist[1, user_events[index]]
+        }
+        
+        }
+  }
+}
+
+
+
+library("intRinsic")

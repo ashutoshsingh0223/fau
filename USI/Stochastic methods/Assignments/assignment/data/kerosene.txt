@@ -1,7 +1,7 @@
 Source: https://www.indexmundi.com/energy/?region=eu&product=kerosene&graph=production
 
 year	production	change
-1980	146.00	NA
+1980	146.00	0
 1981	130.00	-10.96 %
 1982	130.00	0.00 %
 1983	126.00	-3.08 %

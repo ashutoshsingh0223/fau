@@ -1,7 +1,7 @@
 Source: https://www.indexmundi.com/energy/?region=eu&product=oil&graph=production
 
 year	production	change
-1980	2,727.50	NA
+1980	2,727.50	0
 1981	2,922.10	7.13 %
 1982	3,269.30	11.88 %
 1983	3,681.40	12.61 %
