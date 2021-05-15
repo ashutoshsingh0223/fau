@@ -61,8 +61,8 @@ period(McEvent) # Period = 1 implying chain is aperiodic
 # Since Markov chain is irreducible and aperiodic a unique limiting distribution exists
 limiting.dist <- steadyStates(McEvent)
 limiting.dist <- as.data.frame(limiting.dist)
-limiting.dist$login
-
+a <-limiting.dist["login"][1, 1]
+a
 ##### Augmentation Step 2: Adding a time dependency
 # Accounting for: How frequent are user's visits
 # In the series of events there are different time intervals for different users(Scale is not uniform)
@@ -95,14 +95,36 @@ for (user in users){
         if(transition_score > 0){
           user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]] + transition_matrix[user_events[index - 1], user_events[index]]
         }
-        else{
-          user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]]+ limiting.dist[1, user_events[index]]
-        }
-        
-        }
-  }
+      }
+    }
 }
 
+# Storing sparse matrix in a seprate variable
+user_matrix_sparse <- user_matrix
 
+# Now filling the empty values for events on basis on values from staionary distribution 
+for (user in users){
+  for (event in events){
+    if(user_matrix[user, event] == 0){
+      user_matrix[user, event] <- limiting.dist[event][1,1]
+    }
+  }
+
+}
 
 library("intRinsic")
+
+user_hid <- Hidalgo(X=user_matrix, nsim = 5000, burn_in = 2500)
+post_process_user_hid <- Hidalgo_postpr_chains(output=user_hid, all_chains = F)
+autoplot(post_process_user_hid) + ggtitle("Conjugate Prior - Dense")
+
+
+
+user_hid_sparse <- Hidalgo(X=user_matrix_sparse, nsim = 5000, burn_in = 2500)
+post_process_user_hid_sparse <- Hidalgo_postpr_chains(output=user_hid_sparse, all_chains = F)
+autoplot(post_process_user_hid_sparse) + ggtitle("Conjugate Prior - Sparse") 
+
+
+
+
+
