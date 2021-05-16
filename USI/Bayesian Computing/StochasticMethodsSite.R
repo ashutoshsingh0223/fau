@@ -11,7 +11,7 @@ sites <- raw.data$site
 unique_sites <- unique(sites)
 
 unique_sites
-write.csv(unique_sites, '~/Desktop/ashutosh/fau/USI/Bayesian Computing/unique-sites.csv')
+#write.csv(unique_sites, '~/Desktop/ashutosh/fau/USI/Bayesian Computing/unique-sites.csv')
 
 
 
