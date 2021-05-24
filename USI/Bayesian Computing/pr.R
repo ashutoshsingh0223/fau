@@ -5,6 +5,18 @@ raw.data <- read.csv('~/Downloads/results-20210426-141638.csv')
 dim(raw.data)
 head(raw.data)
 
+# Getting unique users. Total number rows in transformed dataset
+users <- unique(raw.data$user_id)
+length(users)
+
+# Getting unique events
+events <- unique(raw.data$event_name)
+events
+length(events)
+
+library("intRinsic")
+
+
 ######## Data Augmentation ##############
 
 ##### Augmentation Step 1: Finding what's missing $$$$$
@@ -19,13 +31,8 @@ user  1        0                              1
 # Also I am planning on giving scores to events visited by users based on transition matrix of scores
 
 
-users <- unique(raw.data$user_id)
-length(users)
 
-# Getting unique events
-events <- unique(raw.data$event_name)
-events
-length(events)
+
 
 # Empty transition matrix
 transition_matrix <- matrix(0, byrow=TRUE,nrow=25,ncol=25, dimnames=list(events, events))
@@ -93,13 +100,14 @@ for (user in users){
       else{
         transition_score <- transition_matrix[user_events[index - 1], user_events[index]]
         if(transition_score > 0){
-          user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]] + transition_matrix[user_events[index - 1], user_events[index]]
+        user_matrix[user, user_events[index]]  <- user_matrix[user, user_events[index]] + transition_matrix[user_events[index - 1], user_events[index]]
         }
-      }
+      }  
     }
 }
 
-# Storing sparse matrix in a seprate variable
+
+# Storing sparse matrix in a separate variable
 user_matrix_sparse <- user_matrix
 
 # Now filling the empty values for events on basis on values from staionary distribution 
@@ -112,7 +120,14 @@ for (user in users){
 
 }
 
-library("intRinsic")
+
+# Filtering out duplicate users and storing them
+dups <- duplicated(user_matrix)
+
+# Finding distinct
+user_matrix <- unique(user_matrix)
+user_matrix_sparse <- unique(user_matrix_sparse)
+
 
 user_hid <- Hidalgo(X=user_matrix, nsim = 5000, burn_in = 2500)
 post_process_user_hid <- Hidalgo_postpr_chains(output=user_hid, all_chains = F)
@@ -122,9 +137,36 @@ autoplot(post_process_user_hid) + ggtitle("Conjugate Prior - Dense")
 
 user_hid_sparse <- Hidalgo(X=user_matrix_sparse, nsim = 5000, burn_in = 2500)
 post_process_user_hid_sparse <- Hidalgo_postpr_chains(output=user_hid_sparse, all_chains = F)
-autoplot(post_process_user_hid_sparse) + ggtitle("Conjugate Prior - Sparse") 
+autoplot(post_process_user_hid_sparse) + ggtitle("Conjugate Prior - Sparse") +
+theme(panel.grid.minor = element_line(colour="blue", size=0.1)) + 
+scale_x_continuous(labels = c(), breaks = seq(0 , length(users), 1))
+
+post_process_user_hid_sparse$ID_summary
+
+sparse_clusters <- Hidalgo_coclustering_matrix(user_hid_sparse, greed = T)
+
+dense_clusters <- Hidalgo_coclustering_matrix(user_hid, greed = T)
 
 
 
+dense_cluster_indices <- dense_clusters$optimalCL
+sparse_cluster_indices <- sparse_clusters$optimalCL
+
+dense_cluster_indices <- as.data.frame(dense_cluster_indices)
+sparse_cluster_indices <- as.data.frame(sparse_cluster_indices)
+
+
+df.result <- data.frame(user_id=users_list,
+                 dense_cluster_id=as.numeric(dense_cluster_indices$dense_cluster_indices),
+                 sparse_cluster_id=as.numeric(sparse_cluster_indices$sparse_cluster_indices))
+colnames(df.result) <- c("users", "dense_cluster_id", "sparse_cluster_id")
+
+
+
+diff.result <- df.result[df.result$dense_cluster_id != df.result$sparse_cluster_id,]
+
+
+dense_clusters_psm <- dense_clusters$psm
+sparse_clusters_psm <- sparse_clusters$psm
 
 

@@ -37,7 +37,9 @@ run_hidalgo <- function(site, index, prior="Conjugate", burn_in=1000, nsim=1000)
   hid0 <- Hidalgo(X=d0[, 2: 21])
   post_process0 <- Hidalgo_postpr_chains(output=hid0, all_chains = F)
   d0$ID_SUMMARY <- post_process0$ID_summary
-  path = paste("/Users/ankitsharma/Downloads/Matlab/", index, sep="")
+  d0$Hidalgo_cluster <- Hidalgo_coclustering_matrix(hid0)$optimalCL
+  
+  path = paste("/Users/ankitsharma/Downloads/ashutosh/fau/USI/Bayesian Computing/stochastic_methods_site_data/", index, sep="")
   write.csv(d0, paste(path, "csv", sep="."), row.names = TRUE)
   autoplot(post_process0) + ggtitle(paste("Conjugate Prior", site, sep="-"))
   return()
@@ -48,7 +50,7 @@ for (i in 1: length(unique_sites)){
 run_hidalgo(site=unique_sites[i], index=i)
 
 }
-
+Hidalgo_coclustering_matrix(hid0)
 
 
 

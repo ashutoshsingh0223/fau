@@ -1,0 +1,13 @@
+function Label = BoundaryLabel(label)
+%UNTITLED3 Summary of this function goes here
+%   Detailed explanation goes here
+mask=ones(3,3,3);
+Boundary=0*label;
+for i=1:6
+bin=convn(double(label==i),mask)/9;
+flag=double((bin>/9)&(bin<(8/9)));
+Boundary=Boundary+flag;
+Label_filt=flag*i;
+end
+end
+
