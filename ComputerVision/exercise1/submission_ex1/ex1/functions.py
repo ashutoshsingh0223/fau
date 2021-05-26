@@ -80,19 +80,17 @@ def detect_edges(R: np.array, edge_threshold: float = -0.01) -> np.array:
     Returns:
         A boolean image with edge pixels set to True.
     """
-    # Step 1 (recommended) : pad the response image to facilitate vectorization (1 line)
     R_pad = np.pad(R, 1)
-    # Step 2 (recommended) : Calculate significant response pixels (1 line)
 
-    # Step 3 (recommended) : create two images with the smaller x-axis and y-axis neighbors respectively (2 lines).
-    # min along x-axis: minimum of each column
-    min_x = np.min(R, axis=0, keepdims=True)
-    # min along y-axis: minimum of each row
-    min_y = np.min(R, axis=1, keepdims=True)
+    # Step 2 (recommended) : create one image for every offset in the 3x3 neighborhood (6 lines).
+    rolling_x = np.lib.stride_tricks.sliding_window_view(R_pad, 3, axis=0, writeable=True)
+    rolling_y = np.lib.stride_tricks.sliding_window_view(R_pad, 3, axis=1, writeable=True)
 
-    # Step 4 (recommended) : Calculate pixels that are lower than either their x-axis or y-axis neighbors (1 line)
-    boolean_array = np.logical_and(np.logical_or(R == min_x, R == min_y), R <= edge_threshold)
+    # Step 3 (recommended) : compute the greatest neighbor of every pixel (1 line)
+    min_x = np.min(rolling_x, axis=2)
 
-    # Step 5 (recommended) : Calculate valid edge pixels by combining significant and axis_minimal pixels (1 line)
+    min_y = np.min(rolling_y, axis=2)
 
+    # Step 4 (recommended) : Compute a boolean image with only all key-points set to True (1 line)
+    boolean_array = np.logical_and(np.logical_or(R == min_x[:, 1:-1], R == min_y[1:-1, :]), R <= edge_threshold)
     return boolean_array
