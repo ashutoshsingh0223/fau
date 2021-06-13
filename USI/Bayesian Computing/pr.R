@@ -128,6 +128,7 @@ dups <- duplicated(user_matrix)
 user_matrix <- unique(user_matrix)
 user_matrix_sparse <- unique(user_matrix_sparse)
 
+users_list <- row.names(user_matrix)
 
 user_hid <- Hidalgo(X=user_matrix, nsim = 5000, burn_in = 2500)
 post_process_user_hid <- Hidalgo_postpr_chains(output=user_hid, all_chains = F)
@@ -137,14 +138,13 @@ autoplot(post_process_user_hid) + ggtitle("Conjugate Prior - Dense")
 
 user_hid_sparse <- Hidalgo(X=user_matrix_sparse, nsim = 5000, burn_in = 2500)
 post_process_user_hid_sparse <- Hidalgo_postpr_chains(output=user_hid_sparse, all_chains = F)
-autoplot(post_process_user_hid_sparse) + ggtitle("Conjugate Prior - Sparse") +
-theme(panel.grid.minor = element_line(colour="blue", size=0.1)) + 
-scale_x_continuous(labels = c(), breaks = seq(0 , length(users), 1))
+autoplot(post_process_user_hid_sparse) + ggtitle("Conjugate Prior - Sparse")
 
 post_process_user_hid_sparse$ID_summary
 
-sparse_clusters <- Hidalgo_coclustering_matrix(user_hid_sparse, greed = T)
 
+
+sparse_clusters <- Hidalgo_coclustering_matrix(user_hid_sparse, greed = T)
 dense_clusters <- Hidalgo_coclustering_matrix(user_hid, greed = T)
 
 
@@ -165,8 +165,109 @@ colnames(df.result) <- c("users", "dense_cluster_id", "sparse_cluster_id")
 
 diff.result <- df.result[df.result$dense_cluster_id != df.result$sparse_cluster_id,]
 
+# Results of users except for users in diff.result
+agree.result <- df.result[df.result$dense_cluster_id == df.result$sparse_cluster_id,]
+
 
 dense_clusters_psm <- dense_clusters$psm
+# Set dim names for easier access 
+dimnames(dense_clusters_psm) <- list(users_list, users_list)
+
 sparse_clusters_psm <- sparse_clusters$psm
+# Set dim names for easier access 
+dimnames(sparse_clusters_psm) <- list(users_list, users_list)
+
+
+
+# Observing the diff.result we can see that
+cluster_3_users_sparse <- df.result[df.result$sparse_cluster_id == 3,]$users
+cluster_3_users_dense <- df.result[df.result$dense_cluster_id == 3,]$users
+cluster_3_users_dense == cluster_3_users_sparse
+# Comparing Dense and Sparse matrix prediction results we see that - 
+# 1. Both model iterations return the same number of clusters
+# 2. Both model iterations return same members for cluster level 3
+# 3. Observing the diff.result we see that both versions predict only slightly different results for cluster 1 and 2
+# 4. Study the co-clustering matrix for more information
+
+# Comparing co-clustering matrices of bot sparse and trial
+
+# For each user in diff.result we compare the posterior co-clustering probablities to members in the same cluster
+
+
+# Separating users for each cluster id.
+# Only take take users except the users which have different results.
+cluster_1_users <- agree.result[agree.result$sparse_cluster_id == 1,]$users
+cluster_2_users <- agree.result[agree.result$sparse_cluster_id == 2,]$users
+
+# 1. Take post probs for predicted cluster users
+# 2. Take posterior probs for cluster predicted by the other method
+# 3. Sort the scores. 
+# 4. Length check to take equal from both lists
+# 5. Get Diff.
+# 6. Want to compare this diff to do a basic comparision between discriminating power of each method between the two clusters
+
+# selecting an example user and calling it user_prime
+
+count = 0
+for (user_prime in diff.result$users){
+  temp <- df.result[df.result$users != user_prime,]
+  cluster_1_users <- temp[temp$dense_cluster_id == 1,]$users
+  cluster_2_users <- temp[temp$dense_cluster_id == 2,]$users
+  scores_1 <- sort(dense_clusters_psm[user_prime, cluster_1_users], decreasing = T)
+  scores_2 <- sort(dense_clusters_psm[user_prime, cluster_2_users], decreasing = T)
+  min_len <- min(length(scores_1), length(scores_2))
+  x_m <- mean(abs(scores_1[1:min_len] - scores_2[1:min_len]))
+  
+  cluster_1_users <- temp[temp$sparse_cluster_id == 1,]$users
+  cluster_2_users <- temp[temp$sparse_cluster_id == 2,]$users
+
+  scores_1 <- sort(sparse_clusters_psm[user_prime, cluster_2_users], decreasing = T)
+  scores_2 <- sort(sparse_clusters_psm[user_prime, cluster_1_users], decreasing = T)
+  min_len <- min(length(scores_1), length(scores_2))
+  y_m <- mean(abs(scores_1[1:min_len] - scores_2[1:min_len]))
+  
+  if(x_m > y_m){
+    count <- count + 1
+  }
+  
+}
+
+user_row.data<- read.csv('~/Downloads/user_rows.csv')
+dimnames(user_row.data) <- list(user_row.data$users, 1:99)
+
+
+cluster_3_users_sparse <- df.result[df.result$sparse_cluster_id == 3,]$users
+cluster_3_users_dense <- df.result[df.result$dense_cluster_id == 3,]$users
+
+cluster_2_users_sparse <- df.result[df.result$sparse_cluster_id == 2,]$users
+cluster_2_users_dense <- df.result[df.result$dense_cluster_id == 2,]$users
+
+cluster_1_users_sparse <- df.result[df.result$sparse_cluster_id == 1,]$users
+cluster_1_users_dense <- df.result[df.result$dense_cluster_id == 1,]$users
+
+
+
+
+cluster_3_users_sparse_ <- user_row.data[cluster_3_users_sparse,]
+cluster_3_users_dense_ <- user_row.data[cluster_3_users_dense,]
+
+cluster_2_users_sparse_ <- user_row.data[cluster_2_users_sparse,]
+cluster_2_users_dense_ <- user_row.data[cluster_2_users_dense,]
+
+cluster_1_users_sparse_ <- user_row.data[cluster_1_users_sparse,]
+cluster_1_users_dense_ <- user_row.data[cluster_1_users_dense,]
+
+write.csv(cluster_3_users_sparse_,"cluster_3_users_sparse.csv", row.names = FALSE)
+write.csv(cluster_3_users_dense_,"cluster_3_users_dense.csv", row.names = FALSE)
+
+write.csv(cluster_2_users_sparse_,"cluster_2_users_sparse.csv", row.names = FALSE)
+write.csv(cluster_2_users_dense_,"cluster_2_users_dense.csv", row.names = FALSE)
+
+write.csv(cluster_1_users_sparse_,"cluster_1_users_sparse.csv", row.names = FALSE)
+write.csv(cluster_1_users_dense_,"cluster_1_users_dense.csv", row.names = FALSE)
+
+
+
+
 
 

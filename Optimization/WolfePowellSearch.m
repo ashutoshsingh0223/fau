@@ -114,6 +114,7 @@ function [t] = WolfePowellSearch(f, x, d, sigma, rho, verbose)
     
     if W_1 == true
         t_minus = t;
+    else
         t_plus = t;
     end
     

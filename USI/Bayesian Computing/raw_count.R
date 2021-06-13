@@ -1,5 +1,6 @@
 # Reading the datafile
 set.seed(12345) 
+
 raw.data <- read.csv('~/Downloads/results-20210426-141638.csv')
 
 dim(raw.data)
