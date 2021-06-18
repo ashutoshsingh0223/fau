@@ -121,7 +121,7 @@ function [t] = WolfePowellSearch(f, x, d, sigma, rho, verbose)
     [value_plus, gradient_plus] = f(x + t*d);
     W_2 = gradient_plus' * d >= rho * gradient' * d;
   end
-  
+  t = t_minus;
   
   
   if verbose
