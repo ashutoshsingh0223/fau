@@ -1,4 +1,4 @@
-function [xmin] = BFGSDescent(f, x0, eps, verbose)
+function [xmin] = BFGSDescent1(f, x0, eps, verbose)
 %BFGSDESCENT Find minimal point of function using inverse BFGS update
 %formula
 
@@ -73,6 +73,20 @@ if verbose
     countIter = 0;
 end
 
+
+function [updatedMatrix] = inverseBFGSupdate(matrix, deltaX, deltaG)
+%     r               = deltaX - matrix*deltaG;
+%     comp1           = (r*deltaX') + (deltaX*r');
+%     comp2           = 1/ (deltaG'*deltaX);
+%     comp3           = (comp2*comp2)*(r'*deltaG);
+%     comp4           = deltaX*deltaX';
+%     updatedMatrix   = matrix + (comp2*comp1) - (comp3*comp4);
+r = deltaX - matrix * deltaG;
+updatedMatrix = matrix + (((r * deltaX') + (deltaX * r')) / (deltaG' * deltaX)) - (((r' * deltaG) * (deltaX * deltaX')) / (deltaG' * deltaX)^2);
+    
+end
+
+        
 %static
 sigma=1.0e-3;
 rho=1.0e-2;
@@ -80,39 +94,36 @@ n=length(x0);
 E=eye(n);
 
 %dynamic
-B=E;
-x_k = x0;
-[value, gradient] = f(x_k);
-while norm(gradient) > eps
-    d_k = -1 * B * gradient;
-    if (gradient' * d_k >= 0)
-%       descent direction check failed
-%       Setting d to steepest descent
-        d_k = -gradient;
-        B = E;
-    end
-    [t_k] = WolfePowellSearch(f, x_k, d_k, 1.0e-3, 1.0e-2, true);
+
+B = E;
+xNew = x0;
+[valueNew, gradNew] = f(xNew);
+while norm(gradNew) > eps
+    d = -1 * B * gradNew; 
+    %descent direction check
+    if (gradNew' * d >=0)
+        d = -gradNew;
+    end  
+    t  = WolfePowellSearch(f, xNew, d, sigma, rho, true);
+    [valueUpdated, gradUpdated] = f(xNew + t*d);
+    delG                        = gradUpdated - gradNew;
+    delX                        = t * d; 
+    %update B
+    B_plus = inverseBFGSupdate(B, delX, delG);
     
-    [value_plus, gradient_plus] = f(x_k + t_k * d_k);
-    
-    del_gk = gradient_plus - gradient;
-    del_x_k = t_k * d_k;
-    
-    x_k = x_k + t_k * d_k;
-    
-    r_k = del_x_k - B * del_gk;
-    B_plus = B + (((r_k * del_x_k') + (del_x_k * r_k')) / (del_gk' * del_x_k)) - (((r_k' * del_gk) * (del_x_k * del_x_k')) / (del_gk' * del_x_k)^2);
-    
-    value = value_plus;
     B = B_plus;
-    gradient = gradient_plus;
-    countIter = countIter + 1;
-    
+      
+    %update x and countIter
+    xNew = xNew + t * d;
+    valueNew = valueUpdated;
+    gradNew = gradUpdated;
+    if verbose
+        countIter=countIter+1;
+    end   
 end
 
-xmin = x_k;
-
-
+xmin = xNew;
+    
 if verbose
     [value, gradient] = f(xmin);
     disp(sprintf('BFGSDescent terminated after %i steps with norm of gradient =%d and the inverse BFGS matrix is\n',countIter, norm(gradient)));
