@@ -19,85 +19,37 @@ np.set_printoptions(edgeitems=30, linewidth=180,
 
 
 def extract_features(img: t_img, num_features: int = 500) -> Tuple[t_points, t_descriptors]:
-    """Extract keypoints and their descriptors.
-    The OpenCV implementation of ORB is used as a backend.
-    https://en.wikipedia.org/wiki/Oriented_FAST_and_rotated_BRIEF
-
-    Args:
-        img: a numpy array of [H x W x 3] size with byte values.
-        num_features: an integer signifying how many points we desire.
-
-    Returns:
-        A tuple containing a numpy array of [N x 2] and numpy array of [N x 32]
-    """
-
     algo = cv2.ORB_create(nfeatures=num_features)
     kp, des = algo.detectAndCompute(img, None)
-    kp = np.array([k.pt for k in kp], dtype=np.int32)
+    kp = np.array([k.pt for k in kp])
     return kp, des
 
 
 def filter_and_align_descriptors(f1: Tuple[t_points, t_descriptors], f2: Tuple[t_points, t_descriptors],
                                  similarity_threshold=.7, similarity_metric='hamming') -> Tuple[t_points, t_points]:
-    """Aligns pairs of keypoints from two images.
-    Aligns keypoints from two images based on descriptor similarity.
-    If K points have been detected in image1 and J points have been detected in image2, the result will be to sets of N
-    points representing points with similar descriptors; where N <= J and K <= points.
-
-    Args:
-        f1: A tuple of two numpy arrays with the first array having dimensions [N x 2] and the second one [N x M]. M
-            representing the dimensionality of the point features. In the case of ORB features, M is 32.
-        f2: A tuple of two numpy arrays with the first array having dimensions [J x 2] and the second one [J x M]. M
-            representing the dimensionality of the point features. In the case of ORB features, M is 32.
-        similarity_threshold: The ratio the distance of most similar descriptor in image2 to the distance of the second
-            most similar ratio.
-        similarity_metric: A string with the name of the metric by witch distances are calculated. It must be compatible
-            with the ones that are defined for scipy.spatial.distance.cdist.
-
-    Returns:
-        A tuple of numpy arrays both sized [N x 2] representing the similar point locations.
-
-    """
     assert f1[0].dtype == f2[0].dtype == np.double
     assert f1[0].shape[1] == f2[0].shape[1] == 2  # descriptor size
     assert f1[1].shape[1] == f2[1].shape[1] == 32  # points size
 
-    # step 1: compute distance matrix (1 to 8 lines)
-    distance_matrix = scipy.spatial.distance.cdist(f1[1], f2[1], metric=similarity_metric)
+    epsilon = .000000001  # for division by zero
+    (points1, descriptors1), (points2, descriptors2) = f1, f2
 
-    # step 2: computing the indexes of src dst so that src[src_idx,:] and dst[dst,:] refer to matching points.
-    matching_indices = np.where(distance_matrix >= 0)
+    FLANN_INDEX_LSH = 6
+    flann_params = dict(algorithm=FLANN_INDEX_LSH, table_number=12, key_size=20, multi_probe_level=3)
+    matcher = cv2.FlannBasedMatcher(flann_params, {})
+    knnmatches = matcher.knnMatch(descriptors1, descriptors2, 2)
 
-    # step 3: find a boolean index of the matched pairs that is true only if a match was significant.
-    # A match is considered significant if the ratio of it's distance to the second best is lower than a given
-    # threshold.
+    first_to_second_ratios = np.zeros(len(knnmatches))
+    indexes1 = np.zeros(len(knnmatches), dtype=np.int32)
+    indexes2 = np.zeros(len(knnmatches), dtype=np.int32)
+    for n, (first, second) in enumerate(knnmatches):
+        first_to_second_ratios[n] = (first.distance / (second.distance + epsilon))
+        indexes1[n] = first.queryIdx
+        indexes2[n] = first.trainIdx
 
-    # For source
-    distance_matrix_temp = distance_matrix.copy()
-    # Sorting all rows in ascending order
-    distance_matrix_temp.sort(axis=1)
-    second_best = distance_matrix_temp[:, 1]
-    ratios = distance_matrix / second_best.reshape(len(second_best), 1)
-    indices = np.where(ratios < similarity_threshold)
-    src_points = f1[0][indices[0], :]
-    dst_points = f2[0][indices[1], :]
-
-
-    # Hint: use the previously computed distance matrix to find the second best match.
-
-    # step 4: removing non significant matches and return the aligned points (their location only!)
-
-    # bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-    # matches = bf.match(f1[1], f2[1])
-    # matches = sorted(matches, key=lambda x: x.distance)
-    # points1 = np.zeros((len(matches), 2), dtype=np.float32)
-    # points2 = np.zeros((len(matches), 2), dtype=np.float32)
-    # thresholdMatches = []
-    # for i, match in enumerate(matches):
-    #     points1[i, :] = f1[match.queryIdx].pt
-    #     points2[i, :] = f2[match.trainIdx].pt
-
-    return src_points, dst_points
+    keep_idx = first_to_second_ratios <= similarity_threshold
+    filtered_indexes1, filtered_indexes2 = indexes1[keep_idx], indexes2[keep_idx]
+    return points1[filtered_indexes1, :], points2[filtered_indexes2, :]
 
 
 def compute_homography(f1: np.array, f2: np.array) -> np.array:
@@ -129,15 +81,6 @@ def compute_homography(f1: np.array, f2: np.array) -> np.array:
     homography_matrix = V[-1, :]
     homography_matrix = homography_matrix.reshape(3, 3)
     homography_matrix_normalized = homography_matrix / homography_matrix[-1, -1]
-
-    # TODO 3
-    # - Construct the (>=8) x 9 matrix A.
-    # - Use the formula from the exercise sheet.
-    # - Note that every match contributes to exactly two rows of the matrix.
-    # - Extract the homogeneous solution of Ah=0 as the rightmost column vector of V.
-    # - Store the result in H.
-    # - Normalize H
-    # Hint: No loops are needed but up to to 2 nested loops might make the solution easier.
     return homography_matrix_normalized
 
 

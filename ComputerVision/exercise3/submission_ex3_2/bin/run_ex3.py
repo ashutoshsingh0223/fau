@@ -95,3 +95,26 @@ def main(parameters):
 
 if __name__ == '__main__':
     main(parameters)
+
+
+
+import cv2
+import numpy as np
+from ex2 import extract_features
+from ex3 import fast_filter_and_align_descriptors, compute_essential_matrix
+
+#intrinsic_camera_params = np.reshape(p.camera_params_list, [3, 3])
+
+
+img1 = cv2.imread("~/Downloads/ref_im.jpeg")
+img2 = cv2.imread("~/Downloads/overlay.jpeg")
+
+
+points1, descriptors1 = extract_features(img1, num_features=5000)
+points2, descriptors2 = extract_features(img2, num_features=5000)
+
+points1, points2 = fast_filter_and_align_descriptors((points1, descriptors1), (points2, descriptors2))
+ex3.show_images([ex3.render_correspondence(img1, points1, img2, points2,
+                                            scale=0.2,
+                                            thickness=3)], ["Correspondences"])
+
