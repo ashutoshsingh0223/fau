@@ -33,41 +33,53 @@ cut = spaugment(A(part1,part2),1);
 cutxy = xy([part1; part2],:);
 
 clf reset
-colordef(gcf,'black')
+colordef(gcf,'white')
 if size(xy,2) == 2
     axis([min(xy(:,1)) max(xy(:,1)) min(xy(:,2)) max(xy(:,2))]);
 else
     axis([min(xy(:,1)) max(xy(:,1)) min(xy(:,2)) max(xy(:,2)) ...
         min(xy(:,3)) max(xy(:,3))]); 
-end;
+end
 
-axis equal;
-axis off;
+% axis equal;
+% axis off;
 
 hold on
+view(3)
 if length(part1) > 0 & length(part2) > 0
-    set(gplotg(cut,cutxy,'-'),'color',color3);
+    set(gplotg(cut,cutxy(:,1:2),'-'),'color',color3);
     xlabel([int2str(cutsize(A,part1)) ' cut edges'],'visible','on');
 else
     xlabel('0 cut edges','visible','on');
 end;
 if length(part1) > 0 
-    set(gplotg(A(part1,part1),xy(part1,:),'-'),'color',color1);
-    if n < 500,
+    
+    set(gplotg(A(part1,part1),xy(part1,1:2),'-'),'Color', [0.5 0.5 0.5]);
+    if size(xy,2) > 2 && n > 500
+      c = linspace(1,10,length(xy(:,1)));
+      set(scatter3(xy(:,1), xy(:,2), xy(:,3), 30, c, 'filled'));
+      colorbar
+      colormap jet
+    end
+    if n < 500
         if size(xy,2) == 2
             set(plot(xy(part1,1),xy(part1,2),'o'),'color',color1);
         else
             set(plot3(xy(part1,1),xy(part1,2),xy(part1,3),'o'),'color',color1);
+            
+
         end;
     end;
 end;
 if length(part2) > 0 
-    set(gplotg(A(part2,part2),xy(part2,:),'-'),'color',color2);
-    if n < 500,
+
+    set(gplotg(A(part2,part2),xy(part2,1:2),'-'),'color','black');
+    if n < 500
         if size(xy,2) == 2
             set(plot(xy(part2,1),xy(part2,2),'o'),'color',color2);
         else
             set(plot3(xy(part2,1),xy(part2,2),xy(part2,3),'o'),'color',color2);
+            
         end;
     end;
 end;

@@ -14,9 +14,7 @@ function handle = gplotg(A,xy,lc)
 %	gplotg(A,xy,lc) uses line type and color instead of the 
 %	default, 'r-'.   For example, lc = 'g:'.  See PLOT.
 
-
-
-if nargin < 3, 
+if nargin < 3 
     lc = 'r-';
 end;
 
@@ -36,14 +34,14 @@ Y = Y(:);
 if size(xy,2) == 2
     h = plot (X, Y, lc);
 else
-    set(gca,'drawmode','fast');
+    set(gca,'SortMethod','childorder');
     Z = [ xy(i,3) xy(j,3) NaN*ones(size(i))]';
     Z = Z(:);
     h = plot3 (X, Y, Z, lc);
 end;
 
-axis equal;
-axis off;
+% axis equal;
+% axis off;
 if nargout >= 1
     handle = h;
 end;
