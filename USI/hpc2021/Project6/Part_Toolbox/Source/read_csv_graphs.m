@@ -9,21 +9,21 @@ addpaths_GP;
 
 % Steps
 % 1. Load the .csv files
-data = readtable("Part_Toolbox/Datasets/Countries_Meshes/csv/NO-9935-adj.csv");
+data = readtable("Part_Toolbox/Datasets/Countries_Meshes/csv/CH-4468-adj.csv");
 % pause;
 % 2. Construct the adjaceny matrix (NxN). There are multiple ways
 %    to do so.
 Adj = sparse(accumarray(data{:,:},1));
 Adj = (Adj + transpose(Adj)) / 2;
 
-coords = readtable("Part_Toolbox/Datasets/Countries_Meshes/csv/NO-9935-pts.csv");
+coords = readtable("Part_Toolbox/Datasets/Countries_Meshes/csv/CH-4468-pts.csv");
 coords = coords{:,:};
 % pause;
 % 3. Visualize the resulting graphs
-gplotg(Adj, coords);
+% gplotg(Adj, coords);
 % pause;
 % 4. Save the resulting graphs
-save('../Datasets/../Datasets/Countries_Mat/Norway_graph.mat','Adj', 'coords');
+save('../Datasets/../Datasets/Countries_Mat/Swiss_graph.mat','Adj', 'coords');
 
 
 

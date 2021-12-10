@@ -14,7 +14,6 @@ lxRoads = Initialize_case(load('../Datasets/Roads/luxembourg_osm.mat'));
 fprintf('\n%7s %20s %16s\n','Method','Recursive','Direct');
 fprintf('%10s %10d %6d %10d %6d\n','Partitions',16,32,16,32);
 
-
 % Steps
 % 1. Initialize the cases
 % 2. Call metismex to

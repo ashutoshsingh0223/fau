@@ -213,5 +213,12 @@ for nmesh = 1:11
     disp(' ');
     disp(' ');
     
+%     disp(cut_coord);
+%     disp(cut_metis);
+%     disp(cut_spectral);
+%     disp(cut_inertial);
+
+
+    
     
 end

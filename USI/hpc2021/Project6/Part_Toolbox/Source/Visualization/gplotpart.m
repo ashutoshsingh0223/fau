@@ -45,7 +45,9 @@ end
 % axis off;
 
 hold on
-view(3)
+if size(xy,2) == 3
+  view(3)
+end
 if length(part1) > 0 & length(part2) > 0
     set(gplotg(cut,cutxy(:,1:2),'-'),'color',color3);
     xlabel([int2str(cutsize(A,part1)) ' cut edges'],'visible','on');
@@ -55,9 +57,9 @@ end;
 if length(part1) > 0 
     
     set(gplotg(A(part1,part1),xy(part1,1:2),'-'),'Color', [0.5 0.5 0.5]);
-    if size(xy,2) > 2 && n > 500
+    if size(xy,2) > 2
       c = linspace(1,10,length(xy(:,1)));
-      set(scatter3(xy(:,1), xy(:,2), xy(:,3), 30, c, 'filled'));
+      set(scatter3(xy(:,1), xy(:,2), xy(:,3), [], xy(:,3),'filled'));
       colorbar
       colormap jet
     end

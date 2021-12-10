@@ -24,6 +24,7 @@ cases = {
     'barth4.mat';
     'ukerbe1.mat';
     'crack.mat';
+    'mesh3e1.mat';
     };
 
 nc = length(cases);
