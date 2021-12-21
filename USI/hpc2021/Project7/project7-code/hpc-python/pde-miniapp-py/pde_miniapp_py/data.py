@@ -278,7 +278,7 @@ class Field:
         """Start exchanging boundary field data"""
         domain = self._domain # copy for convenience
         self.send_requests = [None] * 4
-        self.send_requests[0] = domain.comm_cart.Isend(self._buffW, dest=domain.neighbour_west, tag=0)
+        self.send_requests[0] = domain.comm_cart.Iend(self._buffW, dest=domain.neighbour_west, tag=0)
         self.send_requests[1] = domain.comm_cart.Isend(self._buffE, dest=domain.neighbour_east, tag=0)
         self.send_requests[2] = domain.comm_cart.Isend(self._buffS, dest=domain.neighbour_south, tag=0)
         self.send_requests[3] = domain.comm_cart.Isend(self._buffN, dest=domain.neighbour_north, tag=0)

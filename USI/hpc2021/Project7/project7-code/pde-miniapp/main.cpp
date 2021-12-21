@@ -135,8 +135,12 @@ int main(int argc, char* argv[])
     // read command line arguments
     readcmdline(options, argc, argv);
 
-    // initialize MPI
+    MPI_Init(&argc, &argv);
     int mpi_rank, mpi_size, threadLevelProvided;
+
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &threadLevelProvided);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     // TODO initialize
     // use "MPI_Comm_size", "MPI_Comm_rank" and "MPI_Init_thread"
 

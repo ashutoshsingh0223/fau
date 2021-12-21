@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     # print some domain decomposition specifics
     domain.print()
-
+    print("this is it")
     # allocate global fields
     s_old  = data.Field(domain)
     s_new  = data.Field(domain)
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     Fx     = data.Field(domain)
 
     # set the initial condition (boundary conditions are already set to 0)
+    print("this is it")
     xc = 1. / 4.
     yc = 1. / 4.
     radius = 1. / 8.
@@ -130,6 +131,8 @@ if __name__ == "__main__":
     s_new.bdryE[...] = s_new.bdryN[...] = s_new.bdryS[...] = s_new.bdryW[...] = 0.1
     s_old.bdryE[...] = s_old.bdryN[...] = s_old.bdryS[...] = s_old.bdryW[...] = 0.1
     v.bdryE[...] = v.bdryN[...] = v.bdryS[...] = v.bdryW[...] = 0.1
+
+    print("this is it")
 
     x_global  = (  s_new.domain.global_startx
                  + np.arange(s_new.domain.local_nx))*options.dx
@@ -140,6 +143,8 @@ if __name__ == "__main__":
     R2_global = (X_global - xc)**2 + (Y_global - yc)**2
     s_new.inner[R2_global < radius**2] = 0.2
 
+    print("this is it")
+
     # write initial conditions
     write_output("simulation", s_new, 0, 0.)
 
@@ -148,9 +153,10 @@ if __name__ == "__main__":
     iters_cg     = 0
 
     # initialize CG solver
+    print("this is it")
     cg = linalg.hpc_cg(s_new.domain)
 
-    print(f'here - {domain.rank}')
+    print(f"here - {domain.rank}")
     if domain.rank == 0 and verbose_output:
         print("=== Begin of simulation ===")
         print(80*"-")
@@ -158,12 +164,13 @@ if __name__ == "__main__":
     # start timer
     timespent = - time.perf_counter()
 
+    print("this is it")
     # main time loop
     t        = 0. # initial time
     timestep = 0 # initial step
     while timestep < options.nt:
         # print some info
-        print(f'here {timestep}')
+        print(f"here {timestep}")
         if domain.rank == 0 and verbose_output:
             print(f"timestep / time: {timestep:5d} / {t:10f}")
 
