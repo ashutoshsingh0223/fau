@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     // read command line arguments
     readcmdline(options, argc, argv);
 
-    MPI_Init(&argc, &argv);
+    // MPI_Init(&argc, &argv);
     int mpi_rank, mpi_size, threadLevelProvided;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &threadLevelProvided);
@@ -305,6 +305,8 @@ int main(int argc, char* argv[])
         std::cout << "Goodbye!" << std::endl;
 
     // TODO finalize it using "MPI_Finalize" and "MPI_Comm_free"
+    MPI_Comm_free(&domain.comm_cart);
+    MPI_Finalize();
 
     return 0;
 }

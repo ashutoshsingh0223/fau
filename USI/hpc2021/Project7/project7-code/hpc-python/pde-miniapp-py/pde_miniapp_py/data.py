@@ -278,16 +278,16 @@ class Field:
         """Start exchanging boundary field data"""
         domain = self._domain # copy for convenience
         self.send_requests = [None] * 4
-        self.send_requests[0] = domain.comm_cart.Iend(self._buffW, dest=domain.neighbour_west, tag=0)
-        self.send_requests[1] = domain.comm_cart.Isend(self._buffE, dest=domain.neighbour_east, tag=0)
-        self.send_requests[2] = domain.comm_cart.Isend(self._buffS, dest=domain.neighbour_south, tag=0)
-        self.send_requests[3] = domain.comm_cart.Isend(self._buffN, dest=domain.neighbour_north, tag=0)
+        self.send_requests[0] = domain.comm_cart.Isend(self._buffW, dest=domain.neighbour_west, tag=domain.rank)
+        self.send_requests[1] = domain.comm_cart.Isend(self._buffE, dest=domain.neighbour_east, tag=domain.rank)
+        self.send_requests[2] = domain.comm_cart.Isend(self._buffS, dest=domain.neighbour_south, tag=domain.rank)
+        self.send_requests[3] = domain.comm_cart.Isend(self._buffN, dest=domain.neighbour_north, tag=domain.rank)
 
         self.recv_requests = [None] * 4
-        self.recv_requests[0] = domain.comm_cart.Irecv(self._bdryW, source=domain.neighbour_west, tag=0)
-        self.recv_requests[1] = domain.comm_cart.Irecv(self.bdryE, source=domain.neighbour_east, tag=0)
-        self.recv_requests[2] = domain.comm_cart.Irecv(self.bdryS, source=domain.neighbour_south, tag=0)
-        self.recv_requests[3] = domain.comm_cart.Irecv(self.bdryN, source=domain.neighbour_north, tag=0)
+        self.recv_requests[0] = domain.comm_cart.Irecv(self._bdryW, source=domain.neighbour_west, tag=domain.neighbour_west)
+        self.recv_requests[1] = domain.comm_cart.Irecv(self.bdryE, source=domain.neighbour_east, tag=domain.neighbour_east)
+        self.recv_requests[2] = domain.comm_cart.Irecv(self.bdryS, source=domain.neighbour_south, tag=domain.neighbour_south)
+        self.recv_requests[3] = domain.comm_cart.Irecv(self.bdryN, source=domain.neighbour_north, tag=domain.neighbour_north)
 
         # ... implement ...
 

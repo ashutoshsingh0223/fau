@@ -57,8 +57,8 @@ class hpc_cg:
         # iterate
         converged = False
         for k in range(0, maxiter):
-            if k % 50 == 0:
-                print(f'CG Iteration = {k}')
+            # if k % 50 == 0:
+            #     print(f'CG Iteration = {k}')
 
             delta_k = delta_kp
             if delta_k < tol**2:
