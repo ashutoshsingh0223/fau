@@ -60,10 +60,9 @@ double hpc_dot(Field const& x, Field const& y)
 
     for (int i = 0; i < N; i++)
         result += x[i] * y[i];
-    
-    MPI_Allreduce(&result, &result_global, 1, MPI_DOUBLE, MPI_SUM, data::domain.comm_cart);
 
     // TODO compute dot product over all ranks using "MPI_Allreduce" and "data::domain.comm_cart"
+    MPI_Allreduce(&result, &result_global, 1, MPI_DOUBLE, MPI_SUM, data::domain.comm_cart);
 
     return result_global;
 }
@@ -81,7 +80,6 @@ double hpc_norm2(Field const& x)
 
     // TODO compute norm over all ranks using "MPI_Allreduce" and "data::domain.comm_cart"
     MPI_Allreduce(&result, &result_global, 1, MPI_DOUBLE, MPI_SUM, data::domain.comm_cart);
-
     return sqrt(result_global);
 }
 

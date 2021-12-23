@@ -135,14 +135,16 @@ int main(int argc, char* argv[])
     // read command line arguments
     readcmdline(options, argc, argv);
 
-    // MPI_Init(&argc, &argv);
+    // initialize MPI
     int mpi_rank, mpi_size, threadLevelProvided;
-
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &threadLevelProvided);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     // TODO initialize
     // use "MPI_Comm_size", "MPI_Comm_rank" and "MPI_Init_thread"
+    if( MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &threadLevelProvided) != MPI_SUCCESS ) {
+        std::cerr << "unable to initialize MPI :: exitting" << std::endl;
+        exit(-1);
+    }
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     // initialize subdomain
     domain.init(mpi_rank, mpi_size, options);
