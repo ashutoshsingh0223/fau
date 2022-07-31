@@ -1,0 +1,9 @@
+torch
+gym[accept_rom_license]
+gym[other]
+gym[classic_control]
+ale-py
+atari-py
+matplotlib
+pyglet
+tqdm
