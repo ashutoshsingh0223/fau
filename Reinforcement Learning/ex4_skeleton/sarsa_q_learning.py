@@ -26,8 +26,10 @@ class SARSAQBaseAgent:
         if random_action_prob < epsilon:
             return self.env.action_space.sample()
         else:
-            return np.argmax(self.Q[s[0], s[1], :])
-
+            # Argmax not deterministic and may return different results for different runs if some actions are equiprobable
+            # return np.argmax(self.Q[s[0], s[1], :])
+            max_actions = np.argwhere(self.Q[s[0], s[1]] == np.amax(self.Q[s[0], s[1]])).flatten()
+            return np.random.choice(max_actions)
 
 class SARSAAgent(SARSAQBaseAgent):
     def __init__(self, env, discount_factor, learning_rate, epsilon):

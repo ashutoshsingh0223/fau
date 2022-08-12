@@ -3,7 +3,7 @@ function filtered_image = filter_image(image, filter)
 %   Detailed explanation goes here
 [M, N] = size(image);
 I = size(filter, 2);
-filtered_image = image;
+filtered_image = zeros(size(image));
 
 border_size = (I - 1)/2;
 

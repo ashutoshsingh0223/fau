@@ -1,6 +1,7 @@
 import numpy as np
 from util import GridworldMDP, print_value, print_deterministic_policy, init_value, random_policy
 
+
 def policy_evaluation_one_step(mdp, V, policy, discount=0.99):
     """ Computes one step of policy evaluation.
     Arguments: MDP, value function, policy, discount factor
@@ -22,6 +23,7 @@ def policy_evaluation_one_step(mdp, V, policy, discount=0.99):
     
     return V_new
 
+
 def policy_evaluation(mdp, policy, discount=0.99, theta=0.00001):
     """ Computes full policy evaluation until convergence.
     Arguments: MDP, policy, discount factor, theta
@@ -42,6 +44,7 @@ def policy_evaluation(mdp, policy, discount=0.99, theta=0.00001):
             break
 
     return V
+
 
 def policy_improvement(mdp, V, discount=0.99):
     """ Computes greedy policy w.r.t a given MDP and value function.
@@ -66,6 +69,7 @@ def policy_improvement(mdp, V, discount=0.99):
         policy[s] = np.eye(mdp.num_actions)[greedy_action]
     return policy
 
+
 def policy_iteration(mdp, discount=0.99, theta=0.01):
     """ Computes the policy iteration (PI) algorithm.
     Arguments: MDP, discount factor, theta
@@ -84,6 +88,7 @@ def policy_iteration(mdp, discount=0.99, theta=0.01):
             break
         policy = policy_new
     return V, policy
+
 
 def value_iteration(mdp, discount=0.99, theta=0.01):
     """ Computes the value iteration (VI) algorithm.
@@ -117,6 +122,7 @@ def value_iteration(mdp, discount=0.99, theta=0.01):
     policy = policy_improvement(mdp, V)
     
     return V, policy
+
 
 def value_iteration2(mdp, discount=0.99, theta=0.01):
     """ Computes the value iteration (VI) algorithm.

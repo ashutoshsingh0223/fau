@@ -171,8 +171,8 @@ class DQN():
         rewards = torch.FloatTensor(rewards)
 
         q_values = self.dqn_net(obs)
-        # select q_values for actions that were actually takes i.e `actions` to calculate loss
-        # gather dim = 1 walk alon axis 1 i.e one row at a time(one q vector)
+        # select q_values for actions that were actually taken i.e `actions` to calculate loss
+        # gather dim = 1 walk along axis 1 i.e one row at a time(one q vector)
         # and select value of for action from actions
         # since q_values[batch, num_actions] have a batch dimention actions[batch, ]
         # need one as well added by adding one axis at dim=1 to get a shape[batch, 1], then
@@ -193,7 +193,7 @@ def epsilon_by_timestep(timestep, epsilon_start=1.0, epsilon_final=0.01, frames_
     if timestep >= frames_decay:
         return epsilon_final
     else:
-        epsilon = epsilon_start - ((epsilon_start - epsilon_final) * timestep / 10000)
+        epsilon = epsilon_start - ((epsilon_start - epsilon_final) * timestep / frames_decay)
         return epsilon
 
 

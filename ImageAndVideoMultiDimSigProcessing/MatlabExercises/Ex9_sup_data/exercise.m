@@ -11,7 +11,7 @@ otsu_thresh = otsuthresh(histogram);
 
 otsu_seg = imquantize(img_gray, otsu_thresh);
 
-multi_thresh = multithresh(img, 5);
+multi_thresh = multithresh(img, 4);
 
 multi_seg = imquantize(img_gray, multi_thresh);
 

@@ -192,6 +192,7 @@ class VPG():
         logp_lst = torch.stack(logp_lst)
         return_lst = torch.tensor(return_lst)
 
+        # multiply by -1 here tp get gradient ascent because optimizers are do descent by default
         loss = -logp_lst * return_lst
         return loss.mean()
 
